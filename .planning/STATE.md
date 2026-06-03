@@ -2,13 +2,13 @@
 
 ## Resumo Atual
 - **Projeto inicializado:** Git configurado.
-- **Base de dados de referência localizada:** `C:/Users/Boanerges/Desktop/Projetos/Report Preview/data/raw/dados_status_ocorrencias_gerais_ENRIQUECIDO.csv`.
-- **Arquivos de planejamento criados:** `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, `config.json`.
-- **Fase atual:** Fase 2 (Definição da Área de Interesse & Grade Hexagonal Dinâmica).
+- **Base de dados de referência localizada e tratada:** `data/processed/fortaleza_crimes.csv` criada com sucesso e sem nulos em AIS.
+- **Classe de Grade Hexagonal Móvel implementada:** `src/grid_generator.py` testada com suporte a rotações e deslocamentos.
+- **Fase atual:** Fase 3 (Pipeline de Previsão Semanal por Regressão Linear Múltipla).
 
 ## Progresso das Fases
 - [x] Fase 1: Engenharia de Dados & Alinhamento Territorial
-- [ ] Fase 2: Definição da Área de Interesse (AoI) e Grade Hexagonal Dinâmica
+- [x] Fase 2: Definição da Área de Interesse (AoI) e Grade Hexagonal Dinâmica
 - [ ] Fase 3: Pipeline de Previsão Semanal por Regressão Linear Múltipla
 - [ ] Fase 4: Algoritmo Genético de Busca do Grid Ótimo
 - [ ] Fase 5: Avaliação Comparativa Final e Relatório
