@@ -17,8 +17,22 @@ def main():
     
     # 2. Filtrar Fortaleza
     print("Filtrando registros de Fortaleza/CE...")
-    df_fort = df[df['cidade'].str.upper() == 'FORTALEZA'].copy()
-    print(f"Encontrados {len(df_fort)} registros de Fortaleza.")
+    # Restringir para cidade Fortaleza e garantir que a AIS (quando informada) seja uma das 10 da capital
+    # Isso remove distritos da Região Metropolitana de Fortaleza (RMF) incorretamente classificados
+    capital_ais = ['AIS 05', 'AIS 06', 'AIS 08', 'AIS 16', 'AIS 17', 'AIS 18', 'AIS 19', 'AIS 20', 'AIS 21', 'AIS 22']
+    df_fort = df[
+        (df['cidade'].str.upper() == 'FORTALEZA') & 
+        (df['ais'].isin(capital_ais) | df['ais'].isnull())
+    ].copy()
+    
+    # Remover explicitamente bairros conhecidos da RMF que possuam erros geográficos/cadastrais na base
+    rmf_bairros = ['MARECHAL RONDON', 'INDUSTRIAL', 'PARQUE LEBLON', 'IPARANA', 'PACAJUS', 'ITAITINGA', 
+                   'PACATUBA', 'HORIZONTE', 'PINDORETAMA', 'PARQUE SOLEDADE', 'PARQUE ALBANO', 'TABAPU', 
+                   'PARQUE DAS NACOES', 'CARARU', 'URUCUTUBA', 'DIF III', 'SENADOR POMPEU', 
+                   'JUAZEIRO DO NORTE', 'PIRES FERREIRA', 'IBICUITINGA', 'REDENCAO']
+    df_fort = df_fort[~df_fort['bairro'].str.upper().isin(rmf_bairros)].copy()
+    
+    print(f"Encontrados {len(df_fort)} registros legítimos de Fortaleza.")
     
     # 3. Converter tipos de dados básicos
     df_fort['latitude'] = pd.to_numeric(df_fort['latitude'], errors='coerce')
