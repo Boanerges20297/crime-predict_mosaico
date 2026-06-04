@@ -1,0 +1,77 @@
+{
+  "targets": [
+    {
+      "target_hex_count": 120,
+      "achieved_hex_count": 119,
+      "active_hex_count": 109,
+      "best_quick_model": "poisson",
+      "best_quick_mse": 0.06559938715246653,
+      "best_quick_mae": 0.1619110893301075,
+      "mean_total_cvli_per_hex": 28.394495412844037,
+      "median_total_cvli_per_hex": 20.0,
+      "mean_activity_ratio": 0.10890027403788871,
+      "median_activity_ratio": 0.08658008658008658,
+      "radius": 0.0100177025946232,
+      "theta": 0.19040666040567744
+    },
+    {
+      "target_hex_count": 140,
+      "achieved_hex_count": 133,
+      "active_hex_count": 125,
+      "best_quick_model": "poisson",
+      "best_quick_mse": 0.059982340837941725,
+      "best_quick_mae": 0.14201408030281715,
+      "mean_total_cvli_per_hex": 24.76,
+      "median_total_cvli_per_hex": 18.0,
+      "mean_activity_ratio": 0.09554978354978354,
+      "median_activity_ratio": 0.07792207792207792,
+      "radius": 0.00935615945025577,
+      "theta": 0.19040666040567744
+    },
+    {
+      "target_hex_count": 160,
+      "achieved_hex_count": 133,
+      "active_hex_count": 125,
+      "best_quick_model": "poisson",
+      "best_quick_mse": 0.059982340837941725,
+      "best_quick_mae": 0.14201408030281715,
+      "mean_total_cvli_per_hex": 24.76,
+      "median_total_cvli_per_hex": 18.0,
+      "mean_activity_ratio": 0.09554978354978354,
+      "median_activity_ratio": 0.07792207792207792,
+      "radius": 0.00935615945025577,
+      "theta": 0.19040666040567744
+    },
+    {
+      "target_hex_count": 180,
+      "achieved_hex_count": 133,
+      "active_hex_count": 125,
+      "best_quick_model": "poisson",
+      "best_quick_mse": 0.059982340837941725,
+      "best_quick_mae": 0.14201408030281715,
+      "mean_total_cvli_per_hex": 24.76,
+      "median_total_cvli_per_hex": 18.0,
+      "mean_activity_ratio": 0.09554978354978354,
+      "median_activity_ratio": 0.07792207792207792,
+      "radius": 0.00935615945025577,
+      "theta": 0.19040666040567744
+    },
+    {
+      "target_hex_count": 200,
+      "achieved_hex_count": 133,
+      "active_hex_count": 125,
+      "best_quick_model": "poisson",
+      "best_quick_mse": 0.059982340837941725,
+      "best_quick_mae": 0.14201408030281715,
+      "mean_total_cvli_per_hex": 24.76,
+      "median_total_cvli_per_hex": 18.0,
+      "mean_activity_ratio": 0.09554978354978354,
+      "median_activity_ratio": 0.07792207792207792,
+      "radius": 0.00935615945025577,
+      "theta": 0.19040666040567744
+    }
+  ],
+  "chosen_target": 140,
+  "chosen_achieved_hex_count": 133,
+  "chosen_best_quick_model": "poisson"
+}

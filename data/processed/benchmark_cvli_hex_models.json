@@ -1,0 +1,41 @@
+{
+  "ranking": [
+    {
+      "model": "poisson",
+      "mse": 0.059982340837941725,
+      "mae": 0.14201408030281715,
+      "hexagons_evaluated": 125
+    },
+    {
+      "model": "ridge",
+      "mse": 0.06011590847482676,
+      "mae": 0.14100363079870737,
+      "hexagons_evaluated": 125
+    },
+    {
+      "model": "linear_regression",
+      "mse": 0.060262971828711105,
+      "mae": 0.14117660336705437,
+      "hexagons_evaluated": 125
+    },
+    {
+      "model": "hist_gradient_boosting",
+      "mse": 0.0728161572858949,
+      "mae": 0.1494923463281773,
+      "hexagons_evaluated": 125
+    },
+    {
+      "model": "random_forest",
+      "mse": 0.09028325367351452,
+      "mae": 0.1478881090866805,
+      "hexagons_evaluated": 125
+    },
+    {
+      "model": "naive_lag1",
+      "mse": 0.09828571428571428,
+      "mae": 0.07314285714285715,
+      "hexagons_evaluated": 125
+    }
+  ],
+  "best_model": "poisson"
+}

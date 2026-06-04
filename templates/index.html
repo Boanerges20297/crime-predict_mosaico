@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crime Predict - Dashboard Hexagonal</title>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --panel: #ffffff;
+            --panel-soft: #f8fafc;
+            --text: #0f172a;
+            --muted: #475569;
+            --border: #dbe3ef;
+            --accent: #6d28d9;
+            --accent-strong: #5b21b6;
+            --accent-soft: #ede9fe;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content {
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .header-title {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .muted {
+            color: var(--muted);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: none;
+        }
+
+        .panel.soft {
+            background: var(--panel-soft);
+            box-shadow: none;
+        }
+
+        .scope-banner {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .scope-banner h2 {
+            margin: 0 0 6px;
+            font-size: 18px;
+        }
+
+        .scope-chip,
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            font-size: 12px;
+            margin: 6px 8px 0 0;
+        }
+
+        .scope-chip.primary {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+        }
+
+        .button-row,
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .button,
+        button,
+        .button-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            padding: 9px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+
+        button,
+        .button.primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        button:hover,
+        .button.primary:hover {
+            background: var(--accent-strong);
+        }
+
+        .button.secondary,
+        .button-link.secondary {
+            background: white;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .button.secondary:hover,
+        .button-link.secondary:hover {
+            background: #f8fafc;
+        }
+
+        .report-cta {
+            width: 100%;
+            margin-bottom: 14px;
+            background: #0f172a;
+            color: #ffffff;
+            border-color: #0f172a;
+        }
+
+        .report-cta:hover {
+            background: #1e293b;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        input[type="date"],
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .helper {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .bairro-toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .mini-btn {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .mini-btn:hover {
+            background: #f8fafc;
+        }
+
+        .bairro-list {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            max-height: 250px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .bairro-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+        }
+
+        .bairro-option:hover {
+            background: #f8fafc;
+        }
+
+        .bairro-option input {
+            width: auto;
+            margin: 0;
+        }
+
+        .message {
+            padding: 12px 14px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            border: 1px solid transparent;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #fecaca;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: none;
+        }
+
+        .stat-title {
+            color: var(--muted);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .stat-value {
+            margin-top: 4px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .section-title {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .panel-header .section-title {
+            margin: 0;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 8px;
+        }
+
+        .summary-item {
+            background: var(--panel-soft);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .summary-item strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .map-frame {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            min-height: 720px;
+        }
+
+        .map-frame iframe {
+            min-height: 720px;
+        }
+
+        details {
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel-soft);
+            padding: 10px 12px;
+            margin-bottom: 14px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .empty-note {
+            padding: 28px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        @media (max-width: 1100px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+        }
+
+        @media (max-width: 1400px) {
+            .stats {
+                grid-template-columns: repeat(3, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <h1 class="header-title">Dashboard Hexagonal</h1>
+            <p class="muted">Use filtros simples para recalcular a malha ótima de <strong>CVLI</strong>. Quando nenhum bairro é selecionado, o mapa mostra <strong>Fortaleza inteira</strong>.</p>
+
+            <div class="scope-banner">
+                <h2>
+                    {% if has_active_filters %}
+                        Visualização filtrada
+                    {% else %}
+                        Fortaleza inteira
+                    {% endif %}
+                </h2>
+                <p class="muted" style="margin:0 0 10px;">
+                    {% if has_active_filters %}
+                        Os resultados abaixo refletem os filtros ativos.
+                    {% else %}
+                        Você está vendo a cidade inteira, sem filtros de bairro ou data.
+                    {% endif %}
+                </p>
+                <div class="button-row">
+                    <a class="button-link secondary" href="/">Ver Fortaleza inteira</a>
+                    {% if has_active_filters %}
+                        <span class="scope-chip primary">Filtros ativos</span>
+                    {% else %}
+                        <span class="scope-chip primary">Sem filtros</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button class="button report-cta" type="button" id="report-button-sidebar">Gerar relatório acadêmico</button>
+
+            <form method="get" id="filters-form">
+                <div class="panel">
+                    <h2 class="section-title">Filtros principais</h2>
+
+                    <div class="field">
+                        <label for="bairro-search">Buscar bairros</label>
+                        <input id="bairro-search" type="text" placeholder="Digite para filtrar a lista de bairros">
+                        <div class="helper">Nenhum bairro marcado = Fortaleza inteira.</div>
+                    </div>
+
+                    <div class="bairro-toolbar">
+                        <button class="mini-btn" type="button" id="select-visible">Selecionar visíveis</button>
+                        <button class="mini-btn" type="button" id="clear-bairros">Limpar bairros</button>
+                        <button class="mini-btn" type="button" id="select-all-bairros">Selecionar todos</button>
+                    </div>
+
+                    <div class="bairro-list" id="bairro-list">
+                        {% for bairro in available_bairros %}
+                            <label class="bairro-option" data-bairro="{{ bairro|lower }}">
+                                <input type="checkbox" name="bairro" value="{{ bairro }}" {% if bairro in selected_bairros %}checked{% endif %}>
+                                <span>{{ bairro }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="field-grid" style="margin-top:14px;">
+                        <div class="field">
+                            <label for="start_date">Data inicial</label>
+                            <input id="start_date" name="start_date" type="date" value="{{ start_date }}">
+                        </div>
+                        <div class="field">
+                            <label for="end_date">Data final</label>
+                            <input id="end_date" name="end_date" type="date" value="{{ end_date }}">
+                        </div>
+                    </div>
+
+                    <div class="field" style="margin-top:4px;">
+                        <label style="display:flex; align-items:center; gap:10px; font-weight:600;">
+                            <input type="checkbox" name="hide_sparse_hexes" value="1" {% if hide_sparse_hexes %}checked{% endif %} style="width:auto; margin:0;">
+                            Ocultar hexágonos sem CVLI relevante ou muito esparsos
+                        </label>
+                        <div class="helper">Esparsos = células com atividade muito abaixo do padrão rotineiro da malha ou com até 2 ocorrências totais.</div>
+                    </div>
+
+                    <div class="field" style="margin-top:4px;">
+                        <label style="display:flex; align-items:center; gap:10px; font-weight:600;">
+                            <input type="checkbox" name="show_cvli_points" value="1" {% if show_cvli_points %}checked{% endif %} style="width:auto; margin:0;">
+                            Mostrar clusters CVLI dos últimos 12 meses
+                        </label>
+                        <div class="helper">Agrupa apenas os CVLI mais recentes do recorte atual, reduzindo poluição visual sobre a colmeia.</div>
+                    </div>
+
+                    <div class="quick-actions" style="margin-top:8px;">
+                        <button class="button primary" type="submit">Aplicar filtros e recalcular</button>
+                        <a class="button-link secondary" href="/">Limpar tudo</a>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>Configurações avançadas do algoritmo</summary>
+                    <div class="field-grid" style="margin-top:14px;">
+                        <div class="field">
+                            <label for="pop_size">População do AG</label>
+                            <input id="pop_size" name="pop_size" type="number" min="4" max="40" value="{{ pop_size }}">
+                        </div>
+                        <div class="field">
+                            <label for="generations">Gerações do AG</label>
+                            <input id="generations" name="generations" type="number" min="2" max="30" value="{{ generations }}">
+                        </div>
+                    </div>
+                    <div class="helper">Aumente esses valores só quando quiser uma busca mais refinada, porque o tempo de execução sobe bastante.</div>
+                </details>
+            </form>
+        </aside>
+
+        <main class="content">
+            <div id="feedback-region">
+                {% if result.error %}
+                    <div class="message error">{{ result.error }}</div>
+                {% elif result.from_cache %}
+                    <div class="message success">Resultado recuperado do cache para esses mesmos filtros.</div>
+                {% endif %}
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-title">Ocorrências filtradas</div>
+                    <div class="stat-value">{{ result.metrics.get('records', 0) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Hexágonos criados</div>
+                    <div class="stat-value">{{ result.metrics.get('hexagonos_criados', 0) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Hexágonos ativos</div>
+                    <div class="stat-value">{{ result.metrics.get('hexagonos_ativos', 0) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Hexágonos esparsos</div>
+                    <div class="stat-value" id="metric-hexagonos-esparsos">{{ result.metrics.get('hexagonos_esparsos', 0) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Bairros cobertos</div>
+                    <div class="stat-value">{{ result.metrics.get('bairros_ativos', 0) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Tempo de execução</div>
+                    <div class="stat-value">{{ result.metrics.get('execution_seconds', 0) }}s</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="section-title">Contexto atual</h2>
+                    <button class="button secondary" type="button" id="report-button">Gerar relatório</button>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <strong>Escopo territorial</strong>
+                        {% if selected_bairros %}
+                            {{ selected_bairros|length }} bairro(s) selecionado(s)
+                        {% else %}
+                            Fortaleza inteira
+                        {% endif %}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Tipo criminal</strong>
+                        CVLI apenas
+                    </div>
+                    <div class="summary-item">
+                        <strong>Faixa temporal</strong>
+                        {{ result.metrics.get('data_inicial', '-') }} até {{ result.metrics.get('data_final', '-') }}
+                    </div>
+                    <div class="summary-item">
+                        <strong>EQM hexagonal</strong>
+                        {% if result.metrics.get('mse_hex') is not none %}{{ '%.4f'|format(result.metrics.get('mse_hex')) }}{% else %}-{% endif %}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Modelo semanal por hexágono</strong>
+                        {{ result.metrics.get('forecast_model', '-') }}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Detalhe da malha</strong>
+                        <span id="metric-hexagonos-visiveis">{{ result.metrics.get('hexagonos_visiveis_mapa', 0) }}</span> visíveis no mapa
+                        <span style="display:none" id="metric-hexagonos-criados">{{ result.metrics.get('hexagonos_criados', 0) }}</span>
+                        <span style="display:none" id="metric-hexagonos-renderizados">{{ result.metrics.get('hexagonos_renderizados', 0) }}</span>
+                        <span style="display:none" id="metric-hexagonos-ativos">{{ result.metrics.get('hexagonos_ativos', 0) }}</span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Comparativo</strong>
+                        Bairros: {% if result.metrics.get('mse_bairros') is not none %}{{ '%.4f'|format(result.metrics.get('mse_bairros')) }}{% else %}-{% endif %}<br>
+                        AIS: {% if result.metrics.get('mse_ais') is not none %}{{ '%.4f'|format(result.metrics.get('mse_ais')) }}{% else %}-{% endif %}
+                    </div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <strong>Bairros ativos:</strong>
+                    {% if selected_bairros %}
+                        {% for bairro in selected_bairros[:12] %}
+                            <span class="tag">{{ bairro }}</span>
+                        {% endfor %}
+                        {% if selected_bairros|length > 12 %}
+                            <span class="tag">+ {{ selected_bairros|length - 12 }} mais</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="tag">Fortaleza inteira</span>
+                        <span class="tag">{{ total_bairros }} bairros disponíveis</span>
+                    {% endif %}
+                    <span class="tag">Tooltip com série semanal e previsão</span>
+                    {% if show_cvli_points %}
+                        <span class="tag">Clusters CVLI 12 meses</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="map-frame" id="map-frame">
+                {% if result.map_html %}
+                    <div id="map-frame-content">{{ result.map_html|safe }}</div>
+                {% else %}
+                    <div class="empty-note" id="map-frame-content">Não foi possível montar o mapa para os filtros atuais.</div>
+                {% endif %}
+            </div>
+
+            <details style="margin-top:14px;">
+                <summary>Parâmetros ótimos e diagnóstico do modelo</summary>
+                {% if result.best_config %}
+                    <div class="stats" style="margin:12px 0 0;">
+                        <div class="stat-card">
+                            <div class="stat-title">Raio ótimo (R)</div>
+                            <div class="stat-value">{{ '%.6f'|format(result.best_config['R']) }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Rotação</div>
+                            <div class="stat-value">{{ '%.4f'|format(result.best_config['theta']) }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Deslocamento X</div>
+                            <div class="stat-value">{{ '%.4f'|format(result.best_config['dx']) }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Deslocamento Y</div>
+                            <div class="stat-value">{{ '%.4f'|format(result.best_config['dy']) }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-note">Nenhuma otimização disponível para os filtros atuais.</div>
+                {% endif %}
+            </details>
+        </main>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('bairro-search');
+        const bairroList = document.getElementById('bairro-list');
+        const bairroOptions = Array.from(bairroList.querySelectorAll('.bairro-option'));
+        const clearBairrosButton = document.getElementById('clear-bairros');
+        const selectAllBairrosButton = document.getElementById('select-all-bairros');
+        const selectVisibleButton = document.getElementById('select-visible');
+        const filtersForm = document.getElementById('filters-form');
+        const autoSubmitCheckboxes = Array.from(document.querySelectorAll('input[name="hide_sparse_hexes"], input[name="show_cvli_points"]'));
+        const mapFrameContent = document.getElementById('map-frame-content');
+        const feedbackRegion = document.getElementById('feedback-region');
+        const reportButton = document.getElementById('report-button');
+        const reportButtonSidebar = document.getElementById('report-button-sidebar');
+
+        function openReport() {
+            const formData = new FormData(filtersForm);
+            const params = new URLSearchParams(formData);
+            window.open(`/relatorio?${params.toString()}`, '_blank', 'noopener');
+        }
+
+        async function refreshMapOnly() {
+            const formData = new FormData(filtersForm);
+            const params = new URLSearchParams(formData);
+            params.set('partial', '1');
+
+            autoSubmitCheckboxes.forEach((checkbox) => {
+                checkbox.disabled = true;
+            });
+
+            feedbackRegion.innerHTML = '<div class="message success">Atualizando mapa…</div>';
+
+            try {
+                const response = await fetch(`/?${params.toString()}`, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'fetch' }
+                });
+                const payload = await response.json();
+
+                if (!response.ok || payload.error) {
+                    feedbackRegion.innerHTML = `<div class="message error">${payload.error || 'Falha ao atualizar o mapa.'}</div>`;
+                    return;
+                }
+
+                mapFrameContent.innerHTML = payload.map_html || '<div class="empty-note">Não foi possível montar o mapa para os filtros atuais.</div>';
+
+                const metrics = payload.metrics || {};
+                const metricMap = {
+                    'metric-hexagonos-esparsos': metrics.hexagonos_esparsos,
+                    'metric-hexagonos-criados': metrics.hexagonos_criados,
+                    'metric-hexagonos-renderizados': metrics.hexagonos_renderizados,
+                    'metric-hexagonos-ativos': metrics.hexagonos_ativos,
+                    'metric-hexagonos-visiveis': metrics.hexagonos_visiveis_mapa,
+                };
+
+                Object.entries(metricMap).forEach(([id, value]) => {
+                    const element = document.getElementById(id);
+                    if (element && value !== undefined && value !== null) {
+                        element.textContent = value;
+                    }
+                });
+
+                feedbackRegion.innerHTML = payload.from_cache
+                    ? '<div class="message success">Mapa atualizado a partir do cache.</div>'
+                    : '';
+            } catch (error) {
+                feedbackRegion.innerHTML = '<div class="message error">Falha ao atualizar o mapa sem recarregar a página.</div>';
+            } finally {
+                autoSubmitCheckboxes.forEach((checkbox) => {
+                    checkbox.disabled = false;
+                });
+            }
+        }
+
+        searchInput.addEventListener('input', () => {
+            const term = searchInput.value.trim().toLowerCase();
+            bairroOptions.forEach((option) => {
+                const visible = option.dataset.bairro.includes(term);
+                option.style.display = visible ? 'flex' : 'none';
+            });
+        });
+
+        clearBairrosButton.addEventListener('click', () => {
+            bairroOptions.forEach((option) => {
+                option.querySelector('input').checked = false;
+            });
+        });
+
+        selectAllBairrosButton.addEventListener('click', () => {
+            bairroOptions.forEach((option) => {
+                option.querySelector('input').checked = true;
+            });
+        });
+
+        selectVisibleButton.addEventListener('click', () => {
+            bairroOptions.forEach((option) => {
+                if (option.style.display !== 'none') {
+                    option.querySelector('input').checked = true;
+                }
+            });
+        });
+
+        autoSubmitCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                refreshMapOnly();
+            });
+        });
+
+        reportButton.addEventListener('click', openReport);
+        reportButtonSidebar.addEventListener('click', openReport);
+    </script>
+</body>
+</html>

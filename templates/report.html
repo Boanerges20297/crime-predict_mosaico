@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Relatorio tecnico - CVLI e hexagonos otimos</title>
+    <style>
+        :root {
+            --text: #0f172a;
+            --muted: #475569;
+            --border: #dbe3ef;
+            --soft: #f8fafc;
+            --accent: #6d28d9;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #eef2f7;
+            color: var(--text);
+            font-family: Inter, Arial, sans-serif;
+            line-height: 1.55;
+        }
+
+        .page {
+            max-width: 1080px;
+            margin: 28px auto;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 36px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            line-height: 1.15;
+        }
+
+        h2 {
+            margin: 28px 0 10px;
+            font-size: 21px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+
+        h3 {
+            margin: 18px 0 8px;
+            font-size: 16px;
+        }
+
+        .muted {
+            color: var(--muted);
+            margin: 0;
+        }
+
+        .print-button {
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            background: var(--soft);
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .value {
+            margin-top: 4px;
+            font-size: 22px;
+            font-weight: 850;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 9px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: var(--soft);
+        }
+
+        code,
+        .formula {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-family: Consolas, monospace;
+        }
+
+        .formula-block {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px 0;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+        }
+
+        ul {
+            margin-top: 8px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+            }
+
+            .page {
+                margin: 0;
+                border: 0;
+                box-shadow: none;
+                max-width: none;
+                border-radius: 0;
+            }
+
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <div class="topbar">
+            <div>
+                <h1>Relatorio tecnico da malha hexagonal para CVLI</h1>
+                <p class="muted">Gerado em {{ generated_at }} a partir dos filtros ativos do dashboard.</p>
+            </div>
+            <button class="print-button" onclick="window.print()">Imprimir / PDF</button>
+        </div>
+
+        {% if result.error %}
+            <section class="card">
+                <h2 style="margin-top:0;">Relatorio indisponivel</h2>
+                <p>{{ result.error }}</p>
+            </section>
+        {% else %}
+            <section>
+                <h2>1. Recorte analisado</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="label">Escopo territorial</div>
+                        <div class="value">{% if selected_bairros %}{{ selected_bairros|length }} bairros{% else %}Fortaleza inteira{% endif %}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Tipo criminal</div>
+                        <div class="value">CVLI</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Periodo</div>
+                        <div class="value">{{ result.metrics.get('data_inicial', '-') }} a {{ result.metrics.get('data_final', '-') }}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Registros</div>
+                        <div class="value">{{ result.metrics.get('records', 0) }}</div>
+                    </div>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>Parametro</th>
+                        <th>Valor</th>
+                    </tr>
+                    <tr>
+                        <td>Bairros selecionados</td>
+                        <td>{% if selected_bairros %}{{ selected_bairros|join(', ') }}{% else %}Nenhum bairro selecionado; analise equivalente a Fortaleza inteira.{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Filtro de hexagonos esparsos</td>
+                        <td>{% if hide_sparse_hexes %}Ativo{% else %}Inativo{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Clusters/pontos CVLI no mapa</td>
+                        <td>{% if show_cvli_points %}Ativos{% else %}Inativos{% endif %}</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>2. Indicadores principais</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="label">Hexagonos criados</div>
+                        <div class="value">{{ result.metrics.get('hexagonos_criados', 0) }}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Hexagonos ativos</div>
+                        <div class="value">{{ result.metrics.get('hexagonos_ativos', 0) }}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Hexagonos esparsos</div>
+                        <div class="value">{{ result.metrics.get('hexagonos_esparsos', 0) }}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Hexagonos visiveis</div>
+                        <div class="value">{{ result.metrics.get('hexagonos_visiveis_mapa', 0) }}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Bairros cobertos</div>
+                        <div class="value">{{ result.metrics.get('bairros_ativos', 0) }}</div>
+                    </div>
+                    <div class="card">
+                        <div class="label">Modelo semanal</div>
+                        <div class="value">{{ result.metrics.get('forecast_model', '-') }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>3. Metodologia espacial</h2>
+                <p>O sistema utiliza apenas registros classificados como CVLI e normaliza previamente nomes de bairros para reduzir duplicidades causadas por acentos, caixa e espacamento. O recorte espacial parte dos pontos filtrados, aplica restricao geográfica de Fortaleza e remove componentes desconectados por agrupamento espacial.</p>
+                <p>A area de estudo e inferida a partir da distribuicao de pontos por casco concavo quando disponivel, com fallback para casco convexo. Em seguida, a malha hexagonal e recortada por essa area para evitar que a visualizacao extrapole o conjunto espacial principal.</p>
+
+                <h3>Regra de atribuicao espacial</h3>
+                <div class="formula-block">H(p_i) = h_j</div>
+                <p>Em que <span class="formula">p_i</span> representa uma ocorrencia de CVLI e <span class="formula">h_j</span> representa o hexagono que contem esse ponto.</p>
+            </section>
+
+            <section>
+                <h2>4. Formulação matematica da malha</h2>
+                <p>Cada individuo do algoritmo genetico e representado por:</p>
+                <div class="formula-block">g = (dx, dy, theta, R)</div>
+                <p>em que <span class="formula">dx</span> e <span class="formula">dy</span> deslocam a origem da malha, <span class="formula">theta</span> rotaciona a tesselação e <span class="formula">R</span> define o raio do hexagono regular.</p>
+
+                <table>
+                    <tr>
+                        <th>Grandeza</th>
+                        <th>Formula</th>
+                    </tr>
+                    <tr>
+                        <td>Largura do hexagono</td>
+                        <td><code>w = 2R</code></td>
+                    </tr>
+                    <tr>
+                        <td>Altura do hexagono</td>
+                        <td><code>h = sqrt(3)R</code></td>
+                    </tr>
+                    <tr>
+                        <td>Passo horizontal</td>
+                        <td><code>Delta x = 1.5R</code></td>
+                    </tr>
+                    <tr>
+                        <td>Passo vertical</td>
+                        <td><code>Delta y = sqrt(3)R</code></td>
+                    </tr>
+                    <tr>
+                        <td>Area do hexagono</td>
+                        <td><code>A_hex = (3sqrt(3)/2)R^2</code></td>
+                    </tr>
+                </table>
+
+                <h3>Rotacao</h3>
+                <div class="formula-block">x' = cos(theta)(x - c_x) - sin(theta)(y - c_y) + c_x</div>
+                <div class="formula-block">y' = sin(theta)(x - c_x) + cos(theta)(y - c_y) + c_y</div>
+            </section>
+
+            <section>
+                <h2>5. Otimizacao por algoritmo genetico</h2>
+                <p>A qualidade da malha e avaliada pela capacidade de gerar series semanais por hexagono com menor erro preditivo. O erro principal e o erro quadratico medio:</p>
+                <div class="formula-block">EQM = (1 / m) * soma((y_k - y_hat_k)^2)</div>
+                <p>Tambem ha penalizacao quando o numero de hexagonos se afasta do alvo:</p>
+                <div class="formula-block">delta_hex = |N_hex - N_alvo| / max(N_alvo, 1)</div>
+                <div class="formula-block">EQM_penalizado = EQM + lambda * delta_hex</div>
+                <div class="formula-block">fitness(g) = 1 / (EQM_penalizado(g) + 1e-8)</div>
+
+                {% if result.best_config %}
+                    <table>
+                        <tr>
+                            <th>Parametro otimizado</th>
+                            <th>Valor</th>
+                        </tr>
+                        <tr>
+                            <td>dx</td>
+                            <td>{{ '%.6f'|format(result.best_config.get('dx', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td>dy</td>
+                            <td>{{ '%.6f'|format(result.best_config.get('dy', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td>theta</td>
+                            <td>{{ '%.6f'|format(result.best_config.get('theta', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td>R</td>
+                            <td>{{ '%.6f'|format(result.best_config.get('R', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td>EQM da melhor malha</td>
+                            <td>{% if result.best_config.get('best_mse') is not none %}{{ '%.6f'|format(result.best_config.get('best_mse')) }}{% else %}-{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>EQM penalizado</td>
+                            <td>{% if result.best_config.get('penalized_mse') is not none %}{{ '%.6f'|format(result.best_config.get('penalized_mse')) }}{% else %}-{% endif %}</td>
+                        </tr>
+                    </table>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2>6. Series temporais e previsão</h2>
+                <p>Para cada hexagono ativo, o sistema cria uma serie semanal de contagens de CVLI. As variaveis explicativas usadas no modelo incluem defasagens, media movel recente, tendencia simples e atributos calendario.</p>
+
+                <table>
+                    <tr>
+                        <th>Variavel</th>
+                        <th>Interpretação</th>
+                    </tr>
+                    <tr>
+                        <td><code>lag_1, lag_2, lag_3</code></td>
+                        <td>Contagens semanais anteriores do proprio hexagono.</td>
+                    </tr>
+                    <tr>
+                        <td><code>media_movel_4</code></td>
+                        <td>Media das ultimas quatro semanas observadas.</td>
+                    </tr>
+                    <tr>
+                        <td><code>tendencia_1</code></td>
+                        <td>Diferenca entre a ultima e a penultima semana.</td>
+                    </tr>
+                    <tr>
+                        <td><code>semana_ano</code> e <code>mes</code></td>
+                        <td>Componentes sazonais simples.</td>
+                    </tr>
+                </table>
+
+                <p>O modelo vencedor no benchmark atual e <strong>{{ result.metrics.get('forecast_model', '-') }}</strong>, coerente com uma variavel-alvo de contagem, nao negativa e esparsa.</p>
+            </section>
+
+            <section>
+                <h2>7. Comparativo preditivo</h2>
+                <table>
+                    <tr>
+                        <th>Unidade de agregacao</th>
+                        <th>EQM</th>
+                    </tr>
+                    <tr>
+                        <td>Hexagonos</td>
+                        <td>{% if result.metrics.get('mse_hex') is not none %}{{ '%.6f'|format(result.metrics.get('mse_hex')) }}{% else %}-{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Bairros</td>
+                        <td>{% if result.metrics.get('mse_bairros') is not none %}{{ '%.6f'|format(result.metrics.get('mse_bairros')) }}{% else %}-{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>AIS</td>
+                        <td>{% if result.metrics.get('mse_ais') is not none %}{{ '%.6f'|format(result.metrics.get('mse_ais')) }}{% else %}-{% endif %}</td>
+                    </tr>
+                </table>
+            </section>
+
+            <section>
+                <h2>8. Observacoes metodologicas</h2>
+                <ul>
+                    <li>A malha hexagonal reduz dependencia de limites administrativos e permite uma leitura espacial mais regular.</li>
+                    <li>O CVLI e um evento relativamente raro; por isso, malhas muito pequenas podem gerar series excessivamente esparsas.</li>
+                    <li>Hexagonos esparsos podem ser ocultados no mapa para melhorar a leitura visual, mas continuam relevantes para auditoria metodologica.</li>
+                    <li>O limite territorial ainda e inferido pelos dados; um poligono oficial de Fortaleza melhoraria a validade cartografica.</li>
+                </ul>
+            </section>
+        {% endif %}
+    </main>
+</body>
+</html>

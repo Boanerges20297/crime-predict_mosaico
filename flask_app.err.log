@@ -1,0 +1,49 @@
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 359-325-032
+127.0.0.1 - - [03/Jun/2026 15:04:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:04:48] "GET /?bairro=ALDEOTA&start_date=2025-01-01&end_date=2026-03-31&pop_size=4&generations=2 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:08:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:08:38] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:08:38] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [03/Jun/2026 15:08:50] "GET /?bairro=AEROLANDIA&start_date=&end_date=&pop_size=6&generations=5 HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\src\\flask_app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 359-325-032
+ * Detected change in 'C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\src\\flask_app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 359-325-032
+127.0.0.1 - - [03/Jun/2026 15:15:15] "GET / HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\src\\dashboard_service.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 359-325-032
+127.0.0.1 - - [03/Jun/2026 15:17:23] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:19:34] "GET /?bairro=AEROLANDIA&start_date=&end_date=&pop_size=6&generations=5 HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:19:36] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [03/Jun/2026 15:20:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:21:51] "GET /?bairro=AEROLANDIA&bairro=AEROPORTO&bairro=ALDEOTA&bairro=ALTO+ALEGRE+II&bairro=ALTO+DA+BALANCA&bairro=ALVARO+WEYNE&bairro=AMADEU+FURTADO&bairro=ANCURI&bairro=ANTONIO+BEZERRA&bairro=AUTRAN+NUNES&bairro=BARRA+DO+CEARA&bairro=BARROSO&bairro=BELA+VISTA&bairro=BENFICA&bairro=BOA+VISTA&bairro=BOM+FUTURO&bairro=BOM+JARDIM&bairro=BONSUCESSO&bairro=CAIS+DO+PORTO&bairro=CAJAZEIRAS&bairro=CAMBEBA&bairro=CANINDEZINHO&bairro=CARLITO+PAMPLONA&bairro=CASTELAO&bairro=CENTRO&bairro=CIDADE+2000&bairro=CIDADE+DOS+FUNCIONARIOS&bairro=CIDADE+NOVA&bairro=CIRSTO+REDENTOR&bairro=COACU&bairro=COCO&bairro=CONJUNTO+CEARA+I&bairro=CONJUNTO+CEARA+II&bairro=CONJUNTO+ESPERANCA&bairro=CONJUNTO+PALMEIRAS&bairro=COUTO+FERNANDES&bairro=CRISTO+REDENTOR&bairro=CURIO&bairro=DAMAS&bairro=DE+LOURDES&bairro=DEMOCRITO+ROCHA&bairro=DENDE&bairro=DIAS+MACEDO&bairro=DIONISIO+TORRES&bairro=DOM+LUSTOSA&bairro=EDSON+QUEIROZ&bairro=ENGENHEIRO+LUCIANO+CAVALCANTE&bairro=EUSEBIO&bairro=FARIAS+BRITO&bairro=FATIMA&bairro=FLORESTA&bairro=GENIBAU&bairro=GENTILANDIA&bairro=GRANJA+LISBOA&bairro=GRANJA+PORTUGAL&bairro=GUADALAJARA&bairro=GUAJERU&bairro=HENRIQUE+JORGE&bairro=ITAOCA&bairro=ITAPERI&bairro=JACARECANGA&bairro=JANGURURSSU&bairro=JARDIM+AMERICA&bairro=JARDIM+CEARENSE&bairro=JARDIM+DAS+OLIVEIRAS&bairro=JARDIM+GUANABARA&bairro=JARDIM+IRACEMA&bairro=JOAO+XXIII&bairro=JOAQUIM+TAVORA&bairro=JOQUEI+CLUBE&bairro=JOSE+BONIFACIO&bairro=JOSE+DE+ALENCAR&bairro=LAGOA+REDONDA&bairro=MANOEL+SATIRO&bairro=MANUEL+DIAS+BRANCO&bairro=MARACANAU&bairro=MARAPONGA&bairro=MEIRELES&bairro=MESSEJANA&bairro=MONDUBIM&bairro=MONTE+CASTELO&bairro=MONTESE&bairro=MOURA+BRASIL&bairro=MUCURIPE&bairro=PADRE+ANDRADE&bairro=PANAMERICANO&bairro=PAPICU&bairro=PARANGABA&bairro=PARQUE+ARAXA&bairro=PARQUE+DAS+NACOES&bairro=PARQUE+DOIS+IRMAOS&bairro=PARQUE+IRACEMA&bairro=PARQUE+MANIBURA&bairro=PARQUE+PRESIDENTE+VARGAS&bairro=PARQUE+SANTA+ROSA&bairro=PARQUE+SAO+JOSE&bairro=PARQUELANDIA&bairro=PARREAO&bairro=PASSARE&bairro=PATRIOLINO+RIBEIRO&bairro=PAUPINA&bairro=PEDRAS&bairro=PICI&bairro=PIRAMBU&bairro=PLANALTO+AYRTON+SENNA&bairro=PRAIA+DE+IRACEMA&bairro=PRAIA+DO+FURUTO+II&bairro=PRAIA+DO+FUTURO+I&bairro=PRAIA+DO+FUTURO+II&bairro=PREFEITO+JOSE+WALTER&bairro=PRESIDENTE+KENNEDY&bairro=QUINTINO+CUNHA&bairro=RODOLFO+TEOFILO&bairro=SABIAGUABA&bairro=SALINAS&bairro=SANTA+CLARA&bairro=SAO+BENTO&bairro=SAO+GERARDO&bairro=SAO+JOAO+DO+TAUAPE&bairro=SAO+MIGUEL&bairro=SAPIRANGA+COITE&bairro=SERRINHA&bairro=SIQUEIRA&bairro=TABAPUA&bairro=VARJOTA&bairro=VICENTE+PINZON&bairro=VILA+ELLERY&bairro=VILA+PERY&bairro=VILA+UNIAO&bairro=VILA+VELHA&start_date=&end_date=&pop_size=6&generations=5 HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\src\\spatial_utils.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 359-325-032
+127.0.0.1 - - [03/Jun/2026 15:23:19] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:27:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:27:30] "GET /favicon.ico HTTP/1.1" 404 -
+127.0.0.1 - - [03/Jun/2026 15:29:24] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:29:41] "GET / HTTP/1.1" 200 -
+ * Detected change in 'C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\src\\dashboard_service.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 359-325-032
+127.0.0.1 - - [03/Jun/2026 15:31:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:31:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:31:50] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:32:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:32:13] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [03/Jun/2026 15:32:14] "GET / HTTP/1.1" 200 -
