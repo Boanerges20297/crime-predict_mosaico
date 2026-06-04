@@ -60,7 +60,7 @@ A aptidão é calculada a partir do erro quadrático médio de previsão após:
 Para observar o comportamento da malha em tempo de execução:
 
 ```bash
-python flask_app.py
+python app.py
 ```
 
 Depois abra [http://127.0.0.1:5000](http://127.0.0.1:5000).

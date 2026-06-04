@@ -1,0 +1,9 @@
+services:
+  crime-predict:
+    build: .
+    container_name: crime-predict
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      PYTHONUNBUFFERED: "1"

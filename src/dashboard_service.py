@@ -599,8 +599,8 @@ def analyze_filters(
         df_hex["hex_id"] = grid.assign_points(df_hex)
         df_hex = df_hex[df_hex["hex_id"] != -1].copy()
         hex_summary = summarize_hex_activity(df_hex)
-        weekly_series = prepare_weekly_series(df_hex, region_col="hex_id", lags=3)
         best_model_name = load_best_model_name()
+        weekly_series = prepare_weekly_series(df_hex, region_col="hex_id", lags=3)
         _, forecast_df = train_model_and_forecast(weekly_series, best_model_name, region_col="hex_id", lags=3)
 
         base_metrics = build_metrics(df_filtered, df_hex, best_config, grid, hex_summary, False, forecast_df, best_model_name)
