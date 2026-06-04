@@ -2,8 +2,13 @@ services:
   crime-predict:
     build: .
     container_name: crime-predict
-    restart: unless-stopped
-    ports:
-      - "5059:5000"
+    restart: always
+    expose:
+      - "5000"
     environment:
       PYTHONUNBUFFERED: "1"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.crime-predict.rule=Host(`crime-predict.duckdns.org`)"
+      - "traefik.http.routers.crime-predict.entrypoints=web"
+      - "traefik.http.services.crime-predict.loadbalancer.server.port=5000"
