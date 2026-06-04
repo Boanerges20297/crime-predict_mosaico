@@ -1,3 +1,0 @@
-crime-predict.duckdns.org {
-	reverse_proxy crime-predict:5000
-}
