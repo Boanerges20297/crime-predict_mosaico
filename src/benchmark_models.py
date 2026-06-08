@@ -3,9 +3,20 @@ import os
 
 import numpy as np
 import pandas as pd
-from sklearn.base import clone
-from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
-from sklearn.linear_model import LinearRegression, PoissonRegressor, Ridge
+
+try:
+    from sklearn.base import clone
+    from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
+    from sklearn.linear_model import LinearRegression, PoissonRegressor, Ridge
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    clone = None
+    HistGradientBoostingRegressor = None
+    RandomForestRegressor = None
+    LinearRegression = None
+    PoissonRegressor = None
+    Ridge = None
+    SKLEARN_AVAILABLE = False
 
 from predictor import evaluate_predictions, get_feature_columns, prepare_weekly_series, split_train_test
 
@@ -17,14 +28,17 @@ FORECAST_CSV_PATH = os.path.join(BASE_DIR, "data", "processed", "cvli_hex_foreca
 
 
 def get_model_registry(selected_models=None):
-    registry = {
-        "naive_lag1": None,
-        "linear_regression": LinearRegression(),
-        "ridge": Ridge(alpha=1.0),
-        "poisson": PoissonRegressor(alpha=0.1, max_iter=500),
-        "random_forest": RandomForestRegressor(n_estimators=120, random_state=42, min_samples_leaf=2, n_jobs=1),
-        "hist_gradient_boosting": HistGradientBoostingRegressor(random_state=42, max_depth=6, learning_rate=0.05),
-    }
+    registry = {"naive_lag1": None}
+    if SKLEARN_AVAILABLE:
+        registry.update(
+            {
+                "linear_regression": LinearRegression(),
+                "ridge": Ridge(alpha=1.0),
+                "poisson": PoissonRegressor(alpha=0.1, max_iter=500),
+                "random_forest": RandomForestRegressor(n_estimators=120, random_state=42, min_samples_leaf=2, n_jobs=1),
+                "hist_gradient_boosting": HistGradientBoostingRegressor(random_state=42, max_depth=6, learning_rate=0.05),
+            }
+        )
     if selected_models is None:
         return registry
     return {name: registry[name] for name in selected_models if name in registry}
@@ -98,6 +112,8 @@ def train_best_model_and_forecast(df_hex, benchmark_results, region_col="hex_id"
 
 def train_model_and_forecast(df_hex, model_name, region_col="hex_id", lags=3):
     model_registry = get_model_registry()
+    if model_name not in model_registry:
+        model_name = "naive_lag1"
     model = model_registry[model_name]
     feature_cols = get_feature_columns(lags=lags)
     forecasts = []
@@ -110,7 +126,7 @@ def train_model_and_forecast(df_hex, model_name, region_col="hex_id", lags=3):
         latest = df_region.iloc[-1].copy()
         X_latest = latest[feature_cols].to_frame().T
 
-        if model_name == "naive_lag1":
+        if model_name == "naive_lag1" or not SKLEARN_AVAILABLE:
             prediction = float(max(latest["lag_1"], 0))
         else:
             estimator = clone(model)

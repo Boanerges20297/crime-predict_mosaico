@@ -1,7 +1,26 @@
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+try:
+    from sklearn.linear_model import LinearRegression
+    from sklearn.metrics import mean_absolute_error, mean_squared_error
+except ImportError:
+    LinearRegression = None
+
+    def mean_squared_error(y_true, y_pred):
+        y_true = np.asarray(y_true, dtype=float)
+        y_pred = np.asarray(y_pred, dtype=float)
+        if y_true.size == 0:
+            return np.nan
+        diff = y_true - y_pred
+        return float(np.mean(diff * diff))
+
+    def mean_absolute_error(y_true, y_pred):
+        y_true = np.asarray(y_true, dtype=float)
+        y_pred = np.asarray(y_pred, dtype=float)
+        if y_true.size == 0:
+            return np.nan
+        return float(np.mean(np.abs(y_true - y_pred)))
 
 
 def prepare_weekly_series(df, region_col, lags=3):
@@ -55,6 +74,9 @@ def split_train_test(df_model, train_split_date="2025-12-31"):
 
 
 def evaluate_model(df_model, region_col, lags=3, train_split_date="2025-12-31"):
+    if LinearRegression is None:
+        return np.nan
+
     df_train, df_test = split_train_test(df_model, train_split_date=train_split_date)
     if len(df_train) == 0 or len(df_test) == 0:
         return np.nan

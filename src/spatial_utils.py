@@ -3,7 +3,11 @@ import os
 import numpy as np
 import pandas as pd
 from shapely.geometry import GeometryCollection, MultiPoint, MultiPolygon, Point, Polygon
-from sklearn.cluster import DBSCAN
+
+try:
+    from sklearn.cluster import DBSCAN
+except ImportError:
+    DBSCAN = None
 
 try:
     from shapely import concave_hull as shapely_concave_hull
@@ -52,6 +56,9 @@ def filter_cvli(df):
 
 
 def _largest_cluster_mask(df, lat_col="latitude", lon_col="longitude", eps=0.015, min_samples=40):
+    if DBSCAN is None:
+        return np.ones(len(df), dtype=bool)
+
     if len(df) < min_samples:
         return np.ones(len(df), dtype=bool)
 
