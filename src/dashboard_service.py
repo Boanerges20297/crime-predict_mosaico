@@ -33,6 +33,8 @@ DEFAULT_SEED = 42
 DEFAULT_TARGET_HEX_COUNT = 180
 DEFAULT_HEX_PENALTY_WEIGHT = 5.5
 SPARSE_ACTIVITY_RATIO_FACTOR = 0.35
+SPARSE_MIN_ACTIVITY_RATIO_FLOOR = 0.05
+SPARSE_MIN_ACTIVE_WEEKS = 12
 SPARSE_MIN_TOTAL_CVLI = 2
 KM_PER_LAT_DEGREE = 111.32
 
@@ -124,9 +126,19 @@ def build_analysis_cache_key(selected_bairros, start_date, end_date, pop_size, g
 
 def summarize_hex_activity(df_hex):
     if df_hex.empty:
-        return pd.DataFrame(columns=["hex_id", "total_cvli", "active_weeks", "total_weeks", "activity_ratio", "is_sparse"])
+        return pd.DataFrame(
+            columns=[
+                "hex_id",
+                "total_cvli",
+                "active_weeks",
+                "total_weeks",
+                "activity_ratio",
+                "is_sparse",
+            ]
+        )
 
     temp = df_hex.copy()
+    temp["data"] = pd.to_datetime(temp["data"])
     temp["semana"] = pd.to_datetime(temp["data"]).dt.to_period("W").dt.start_time
     weekly = temp.groupby(["hex_id", "semana"]).size().reset_index(name="cvli")
     total_weeks = int(weekly["semana"].nunique()) if not weekly.empty else 0
@@ -139,9 +151,10 @@ def summarize_hex_activity(df_hex):
     summary["activity_ratio"] = summary["active_weeks"] / summary["total_weeks"].replace(0, 1)
 
     median_ratio = summary["activity_ratio"].median() if not summary.empty else 0
-    sparse_ratio_threshold = median_ratio * SPARSE_ACTIVITY_RATIO_FACTOR
+    sparse_ratio_threshold = max(median_ratio * SPARSE_ACTIVITY_RATIO_FACTOR, SPARSE_MIN_ACTIVITY_RATIO_FLOOR)
     summary["is_sparse"] = (
         (summary["activity_ratio"] < sparse_ratio_threshold)
+        | (summary["active_weeks"] < SPARSE_MIN_ACTIVE_WEEKS)
         | (summary["total_cvli"] <= SPARSE_MIN_TOTAL_CVLI)
     )
     return summary
@@ -298,7 +311,6 @@ def build_map(
 
     group_hex = FeatureGroup(name="Hexágonos ótimos", show=True)
     group_bairros = FeatureGroup(name="Centroides de bairros", show=False)
-    group_points = FeatureGroup(name="Ocorrências CVLI", show=show_cvli_points)
 
     hex_counts = df_hex["hex_id"].value_counts().to_dict()
     max_count = max(hex_counts.values()) if hex_counts else 1
@@ -485,7 +497,7 @@ def build_map(
                 "maxClusterRadius": 80,
                 "disableClusteringAtZoom": 17,
             },
-        ).add_to(group_points)
+        ).add_to(map_object)
 
     bairro_centroids = df_records.groupby("bairro")[["latitude", "longitude"]].mean()
     bairro_counts = df_records["bairro"].value_counts()
@@ -503,7 +515,6 @@ def build_map(
 
     group_hex.add_to(map_object)
     group_bairros.add_to(map_object)
-    group_points.add_to(map_object)
     LayerControl(collapsed=False).add_to(map_object)
     map_object.get_root().html.add_child(folium.Element(_build_map_legend_html(show_cvli_points=show_cvli_points)))
     return map_object._repr_html_()
