@@ -1,0 +1,108 @@
+{
+  "experiment_name": "experimento_hexagonos_95",
+  "region_col": "hex_id",
+  "coverage_threshold": 0.95,
+  "selected_regions": 94,
+  "total_events": 3095,
+  "filtered_events": 2946,
+  "achieved_coverage": 0.9518578352180938,
+  "best_model": "poisson",
+  "lags": 3,
+  "train_split_date": "2025-12-31",
+  "data_path": "C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\data\\processed\\fortaleza_crimes_normalizado.csv",
+  "coverage_table_preview": [
+    {
+      "hex_id": 66,
+      "event_count": 100,
+      "event_share": 0.03231017770597738,
+      "cumulative_share": 0.03231017770597738,
+      "selected": true
+    },
+    {
+      "hex_id": 100,
+      "event_count": 92,
+      "event_share": 0.029725363489499192,
+      "cumulative_share": 0.06203554119547658,
+      "selected": true
+    },
+    {
+      "hex_id": 50,
+      "event_count": 89,
+      "event_share": 0.028756058158319872,
+      "cumulative_share": 0.09079159935379645,
+      "selected": true
+    },
+    {
+      "hex_id": 8,
+      "event_count": 80,
+      "event_share": 0.025848142164781908,
+      "cumulative_share": 0.11663974151857837,
+      "selected": true
+    },
+    {
+      "hex_id": 63,
+      "event_count": 78,
+      "event_share": 0.025201938610662358,
+      "cumulative_share": 0.14184168012924073,
+      "selected": true
+    },
+    {
+      "hex_id": 24,
+      "event_count": 77,
+      "event_share": 0.024878836833602584,
+      "cumulative_share": 0.16672051696284332,
+      "selected": true
+    },
+    {
+      "hex_id": 14,
+      "event_count": 62,
+      "event_share": 0.020032310177705976,
+      "cumulative_share": 0.1867528271405493,
+      "selected": true
+    },
+    {
+      "hex_id": 81,
+      "event_count": 62,
+      "event_share": 0.020032310177705976,
+      "cumulative_share": 0.2067851373182553,
+      "selected": true
+    },
+    {
+      "hex_id": 21,
+      "event_count": 61,
+      "event_share": 0.019709208400646203,
+      "cumulative_share": 0.22649434571890148,
+      "selected": true
+    },
+    {
+      "hex_id": 49,
+      "event_count": 57,
+      "event_share": 0.01841680129240711,
+      "cumulative_share": 0.2449111470113086,
+      "selected": true
+    }
+  ],
+  "regions_total": 94,
+  "regions_evaluated": 94,
+  "regions_skipped": 0,
+  "mse_mean": 0.07751943488650911,
+  "mse_variance": 0.013910094405409544,
+  "mae_mean": 0.17873288596368284,
+  "mae_variance": 0.013848373826891823,
+  "model": "poisson",
+  "hex_grid": {
+    "dx": 0.8324426408004217,
+    "dy": 0.21233911067827616,
+    "theta": 0.19040666040567744,
+    "R": 0.00935615945025577,
+    "hex_count": 133,
+    "active_hex_count": 125,
+    "target_hex_count": 140
+  },
+  "evaluated_models": [
+    "naive_lag1",
+    "linear_regression",
+    "ridge",
+    "poisson"
+  ]
+}

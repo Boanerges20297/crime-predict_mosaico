@@ -1,0 +1,307 @@
+{
+  "targets": [
+    {
+      "target_hex_count": 120,
+      "best_grid": {
+        "dx": 0.8324426408004217,
+        "dy": 0.1153587785410608,
+        "theta": 0.19040666040567744,
+        "R": 0.0100177025946232,
+        "best_mse": 0.055869606838059714,
+        "penalized_mse": 0.10170294017139304,
+        "hex_count": 119,
+        "active_hex_count": 109,
+        "target_hex_count": 120
+      },
+      "created_hex_count": 119,
+      "active_hex_count": 109,
+      "retained_hex_count": 83,
+      "coverage_achieved": 0.9502423263327948,
+      "best_model": "poisson",
+      "mse_mean": 0.08423336888534269,
+      "mse_variance": 0.010741961536684053,
+      "mae_mean": 0.2031630259511145,
+      "mae_variance": 0.015728001666532248,
+      "coverage_preview": [
+        {
+          "hex_id": 47,
+          "event_count": 98,
+          "event_share": 0.031663974151857836,
+          "cumulative_share": 0.031663974151857836,
+          "selected": true
+        },
+        {
+          "hex_id": 59,
+          "event_count": 88,
+          "event_share": 0.028432956381260095,
+          "cumulative_share": 0.06009693053311793,
+          "selected": true
+        },
+        {
+          "hex_id": 22,
+          "event_count": 82,
+          "event_share": 0.026494345718901455,
+          "cumulative_share": 0.08659127625201939,
+          "selected": true
+        },
+        {
+          "hex_id": 64,
+          "event_count": 79,
+          "event_share": 0.02552504038772213,
+          "cumulative_share": 0.11211631663974152,
+          "selected": true
+        },
+        {
+          "hex_id": 62,
+          "event_count": 78,
+          "event_share": 0.025201938610662358,
+          "cumulative_share": 0.13731825525040386,
+          "selected": true
+        }
+      ]
+    },
+    {
+      "target_hex_count": 140,
+      "best_grid": {
+        "dx": 0.8324426408004217,
+        "dy": 0.21233911067827616,
+        "theta": 0.19040666040567744,
+        "R": 0.00935615945025577,
+        "best_mse": 0.053355945323510956,
+        "penalized_mse": 0.328355945323511,
+        "hex_count": 133,
+        "active_hex_count": 125,
+        "target_hex_count": 140
+      },
+      "created_hex_count": 133,
+      "active_hex_count": 125,
+      "retained_hex_count": 94,
+      "coverage_achieved": 0.9518578352180938,
+      "best_model": "poisson",
+      "mse_mean": 0.07751943488650911,
+      "mse_variance": 0.013910094405409544,
+      "mae_mean": 0.17873288596368284,
+      "mae_variance": 0.013848373826891823,
+      "coverage_preview": [
+        {
+          "hex_id": 66,
+          "event_count": 100,
+          "event_share": 0.03231017770597738,
+          "cumulative_share": 0.03231017770597738,
+          "selected": true
+        },
+        {
+          "hex_id": 100,
+          "event_count": 92,
+          "event_share": 0.029725363489499192,
+          "cumulative_share": 0.06203554119547658,
+          "selected": true
+        },
+        {
+          "hex_id": 50,
+          "event_count": 89,
+          "event_share": 0.028756058158319872,
+          "cumulative_share": 0.09079159935379645,
+          "selected": true
+        },
+        {
+          "hex_id": 8,
+          "event_count": 80,
+          "event_share": 0.025848142164781908,
+          "cumulative_share": 0.11663974151857837,
+          "selected": true
+        },
+        {
+          "hex_id": 63,
+          "event_count": 78,
+          "event_share": 0.025201938610662358,
+          "cumulative_share": 0.14184168012924073,
+          "selected": true
+        }
+      ]
+    },
+    {
+      "target_hex_count": 160,
+      "best_grid": {
+        "dx": 0.8324426408004217,
+        "dy": 0.21233911067827616,
+        "theta": 0.19040666040567744,
+        "R": 0.00935615945025577,
+        "best_mse": 0.053355945323510956,
+        "penalized_mse": 0.981480945323511,
+        "hex_count": 133,
+        "active_hex_count": 125,
+        "target_hex_count": 160
+      },
+      "created_hex_count": 133,
+      "active_hex_count": 125,
+      "retained_hex_count": 94,
+      "coverage_achieved": 0.9518578352180938,
+      "best_model": "poisson",
+      "mse_mean": 0.07751943488650911,
+      "mse_variance": 0.013910094405409544,
+      "mae_mean": 0.17873288596368284,
+      "mae_variance": 0.013848373826891823,
+      "coverage_preview": [
+        {
+          "hex_id": 66,
+          "event_count": 100,
+          "event_share": 0.03231017770597738,
+          "cumulative_share": 0.03231017770597738,
+          "selected": true
+        },
+        {
+          "hex_id": 100,
+          "event_count": 92,
+          "event_share": 0.029725363489499192,
+          "cumulative_share": 0.06203554119547658,
+          "selected": true
+        },
+        {
+          "hex_id": 50,
+          "event_count": 89,
+          "event_share": 0.028756058158319872,
+          "cumulative_share": 0.09079159935379645,
+          "selected": true
+        },
+        {
+          "hex_id": 8,
+          "event_count": 80,
+          "event_share": 0.025848142164781908,
+          "cumulative_share": 0.11663974151857837,
+          "selected": true
+        },
+        {
+          "hex_id": 63,
+          "event_count": 78,
+          "event_share": 0.025201938610662358,
+          "cumulative_share": 0.14184168012924073,
+          "selected": true
+        }
+      ]
+    },
+    {
+      "target_hex_count": 180,
+      "best_grid": {
+        "dx": 0.8324426408004217,
+        "dy": 0.21233911067827616,
+        "theta": 0.19040666040567744,
+        "R": 0.00935615945025577,
+        "best_mse": 0.053355945323510956,
+        "penalized_mse": 1.4894670564346222,
+        "hex_count": 133,
+        "active_hex_count": 125,
+        "target_hex_count": 180
+      },
+      "created_hex_count": 133,
+      "active_hex_count": 125,
+      "retained_hex_count": 94,
+      "coverage_achieved": 0.9518578352180938,
+      "best_model": "poisson",
+      "mse_mean": 0.07751943488650911,
+      "mse_variance": 0.013910094405409544,
+      "mae_mean": 0.17873288596368284,
+      "mae_variance": 0.013848373826891823,
+      "coverage_preview": [
+        {
+          "hex_id": 66,
+          "event_count": 100,
+          "event_share": 0.03231017770597738,
+          "cumulative_share": 0.03231017770597738,
+          "selected": true
+        },
+        {
+          "hex_id": 100,
+          "event_count": 92,
+          "event_share": 0.029725363489499192,
+          "cumulative_share": 0.06203554119547658,
+          "selected": true
+        },
+        {
+          "hex_id": 50,
+          "event_count": 89,
+          "event_share": 0.028756058158319872,
+          "cumulative_share": 0.09079159935379645,
+          "selected": true
+        },
+        {
+          "hex_id": 8,
+          "event_count": 80,
+          "event_share": 0.025848142164781908,
+          "cumulative_share": 0.11663974151857837,
+          "selected": true
+        },
+        {
+          "hex_id": 63,
+          "event_count": 78,
+          "event_share": 0.025201938610662358,
+          "cumulative_share": 0.14184168012924073,
+          "selected": true
+        }
+      ]
+    },
+    {
+      "target_hex_count": 200,
+      "best_grid": {
+        "dx": 0.8324426408004217,
+        "dy": 0.21233911067827616,
+        "theta": 0.19040666040567744,
+        "R": 0.00935615945025577,
+        "best_mse": 0.053355945323510956,
+        "penalized_mse": 1.895855945323511,
+        "hex_count": 133,
+        "active_hex_count": 125,
+        "target_hex_count": 200
+      },
+      "created_hex_count": 133,
+      "active_hex_count": 125,
+      "retained_hex_count": 94,
+      "coverage_achieved": 0.9518578352180938,
+      "best_model": "poisson",
+      "mse_mean": 0.07751943488650911,
+      "mse_variance": 0.013910094405409544,
+      "mae_mean": 0.17873288596368284,
+      "mae_variance": 0.013848373826891823,
+      "coverage_preview": [
+        {
+          "hex_id": 66,
+          "event_count": 100,
+          "event_share": 0.03231017770597738,
+          "cumulative_share": 0.03231017770597738,
+          "selected": true
+        },
+        {
+          "hex_id": 100,
+          "event_count": 92,
+          "event_share": 0.029725363489499192,
+          "cumulative_share": 0.06203554119547658,
+          "selected": true
+        },
+        {
+          "hex_id": 50,
+          "event_count": 89,
+          "event_share": 0.028756058158319872,
+          "cumulative_share": 0.09079159935379645,
+          "selected": true
+        },
+        {
+          "hex_id": 8,
+          "event_count": 80,
+          "event_share": 0.025848142164781908,
+          "cumulative_share": 0.11663974151857837,
+          "selected": true
+        },
+        {
+          "hex_id": 63,
+          "event_count": 78,
+          "event_share": 0.025201938610662358,
+          "cumulative_share": 0.14184168012924073,
+          "selected": true
+        }
+      ]
+    }
+  ],
+  "chosen_target": 140,
+  "chosen_created_hex_count": 133,
+  "chosen_best_model": "poisson"
+}

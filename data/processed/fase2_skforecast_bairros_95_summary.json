@@ -1,0 +1,101 @@
+{
+  "experiment_name": "fase2_skforecast_bairros_95",
+  "region_col": "bairro",
+  "coverage_threshold": 0.95,
+  "selected_regions": 86,
+  "total_events": 3095,
+  "filtered_events": 2947,
+  "achieved_coverage": 0.9521809369951535,
+  "best_model": "poisson",
+  "lags": 3,
+  "train_split_date": "2025-12-31",
+  "data_path": "C:\\Users\\Boanerges\\Desktop\\Projetos\\Crime_Predict-Algoritmo Genetico\\data\\processed\\fortaleza_crimes_normalizado.csv",
+  "coverage_table_preview": [
+    {
+      "bairro": "JANGURURSSU",
+      "event_count": 156,
+      "event_share": 0.050403877221324715,
+      "cumulative_share": 0.050403877221324715,
+      "selected": true
+    },
+    {
+      "bairro": "BARRA DO CEARA",
+      "event_count": 134,
+      "event_share": 0.04329563812600969,
+      "cumulative_share": 0.09369951534733441,
+      "selected": true
+    },
+    {
+      "bairro": "MESSEJANA",
+      "event_count": 115,
+      "event_share": 0.03715670436187399,
+      "cumulative_share": 0.1308562197092084,
+      "selected": true
+    },
+    {
+      "bairro": "GRANJA LISBOA",
+      "event_count": 104,
+      "event_share": 0.03360258481421648,
+      "cumulative_share": 0.16445880452342487,
+      "selected": true
+    },
+    {
+      "bairro": "PLANALTO AYRTON SENNA",
+      "event_count": 93,
+      "event_share": 0.030048465266558966,
+      "cumulative_share": 0.19450726978998384,
+      "selected": true
+    },
+    {
+      "bairro": "PREFEITO JOSE WALTER",
+      "event_count": 92,
+      "event_share": 0.029725363489499192,
+      "cumulative_share": 0.22423263327948303,
+      "selected": true
+    },
+    {
+      "bairro": "MONDUBIM",
+      "event_count": 90,
+      "event_share": 0.029079159935379646,
+      "cumulative_share": 0.2533117932148627,
+      "selected": true
+    },
+    {
+      "bairro": "SIQUEIRA",
+      "event_count": 78,
+      "event_share": 0.025201938610662358,
+      "cumulative_share": 0.278513731825525,
+      "selected": true
+    },
+    {
+      "bairro": "BARROSO",
+      "event_count": 72,
+      "event_share": 0.023263327948303717,
+      "cumulative_share": 0.30177705977382874,
+      "selected": true
+    },
+    {
+      "bairro": "QUINTINO CUNHA",
+      "event_count": 67,
+      "event_share": 0.021647819063004847,
+      "cumulative_share": 0.3234248788368336,
+      "selected": true
+    }
+  ],
+  "regions_total": 86,
+  "regions_evaluated": 86,
+  "regions_skipped": 0,
+  "mse_mean": 0.0820414900219195,
+  "mse_variance": 0.014874508169829641,
+  "mae_mean": 0.18715004684906963,
+  "mae_variance": 0.021579130708314215,
+  "model": "poisson",
+  "framework": "skforecast",
+  "skforecast_strategy": "ForecasterRecursive",
+  "evaluated_models": [
+    "linear_regression",
+    "ridge",
+    "poisson",
+    "hist_gradient_boosting"
+  ]
+}
