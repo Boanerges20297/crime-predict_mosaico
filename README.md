@@ -9,6 +9,19 @@ O projeto gera um mapa em `mapa_interativo_fortaleza.html` com comparacao entre:
 - Bairros
 - Mosaico Hexagonal Otimo
 
+## Documentacao academica
+
+Para uma explicacao completa em linguagem de mestrado, incluindo:
+- algoritmo genetico de escolha da malha;
+- formulas de EQM/EAM;
+- protocolo de cobertura de 95%;
+- comparacao entre bairros e hexagonos;
+- arquitetura explicavel do app Flask;
+
+consulte:
+
+- `DOCUMENTACAO_ACADEMICA_PLATAFORMA.md`
+
 ## Como funciona o AG
 
 Cada individuo usa quatro genes:

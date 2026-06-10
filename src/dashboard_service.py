@@ -35,7 +35,8 @@ DEFAULT_HEX_PENALTY_WEIGHT = 5.5
 SPARSE_ACTIVITY_RATIO_FACTOR = 0.35
 SPARSE_MIN_ACTIVITY_RATIO_FLOOR = 0.05
 SPARSE_MIN_ACTIVE_WEEKS = 12
-SPARSE_MIN_TOTAL_CVLI = 2
+WEEKS_PER_TWO_MONTHS = (365.25 / 12 * 2) / 7
+SPARSE_MIN_CVLI_PER_TWO_MONTHS = 1.0
 KM_PER_LAT_DEGREE = 111.32
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -133,6 +134,7 @@ def summarize_hex_activity(df_hex):
                 "active_weeks",
                 "total_weeks",
                 "activity_ratio",
+                "avg_cvli_per_two_months",
                 "is_sparse",
             ]
         )
@@ -149,13 +151,16 @@ def summarize_hex_activity(df_hex):
     ).reset_index()
     summary["total_weeks"] = total_weeks
     summary["activity_ratio"] = summary["active_weeks"] / summary["total_weeks"].replace(0, 1)
+    summary["avg_cvli_per_two_months"] = summary["total_cvli"] / (
+        summary["total_weeks"].replace(0, 1) / WEEKS_PER_TWO_MONTHS
+    )
 
     median_ratio = summary["activity_ratio"].median() if not summary.empty else 0
     sparse_ratio_threshold = max(median_ratio * SPARSE_ACTIVITY_RATIO_FACTOR, SPARSE_MIN_ACTIVITY_RATIO_FLOOR)
     summary["is_sparse"] = (
         (summary["activity_ratio"] < sparse_ratio_threshold)
         | (summary["active_weeks"] < SPARSE_MIN_ACTIVE_WEEKS)
-        | (summary["total_cvli"] <= SPARSE_MIN_TOTAL_CVLI)
+        | (summary["avg_cvli_per_two_months"] < SPARSE_MIN_CVLI_PER_TWO_MONTHS)
     )
     return summary
 

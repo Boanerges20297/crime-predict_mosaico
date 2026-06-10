@@ -51,6 +51,3 @@ flask_app.err.log
 # ===== Local planning/tooling artifacts =====
 .planning/
 
-# ===== Optional large local datasets (uncomment if desired) =====
-# data/raw/
-# data/processed/

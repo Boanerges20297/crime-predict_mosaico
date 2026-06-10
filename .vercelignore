@@ -1,0 +1,28 @@
+.git/
+.venv/
+**/__pycache__/
+*.pyc
+*.pyo
+*.log
+.planning/
+
+# Docs and local artifacts
+*.md
+mapa_interativo_fortaleza.html
+Dockerfile
+docker-compose.yml
+
+# Raw and non-runtime datasets
+data/raw/
+data/processed/dados_status_ocorrencias_gerais_ENRIQUECIDO.csv
+data/processed/*_weekly_series.csv
+data/processed/*_predictions.csv
+data/processed/*_next_step_forecasts.csv
+data/processed/*_coverage.csv
+data/processed/*_metrics.csv
+data/processed/*_summary.json
+data/processed/cvli_hex_forecasts.csv
+data/processed/cvli_hex_sweep.json
+data/processed/fase2_skforecast_comparison.json
+data/processed/hex_sweep_orientador.json
+data/processed/orientador_comparison.json
