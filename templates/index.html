@@ -370,6 +370,199 @@
                 grid-template-columns: repeat(3, minmax(120px, 1fr));
             }
         }
+
+        /* ─── Orientador Space ────────────────────────────────────────── */
+        .btn-orientador {
+            background: #dc2626;
+            color: white;
+            border-color: #dc2626;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn-orientador:hover { background: #b91c1c; border-color: #b91c1c; }
+
+        .op-modal-bg {
+            position: fixed; inset: 0; z-index: 8000;
+            background: rgba(15,23,42,0.65);
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .op-modal-box {
+            background: white; border-radius: 16px; padding: 32px;
+            width: 380px; max-width: 95vw;
+            box-shadow: 0 24px 64px rgba(15,23,42,0.28);
+        }
+        .op-modal-title {
+            display: flex; align-items: center; gap: 12px;
+            margin: 0 0 8px; font-size: 20px; font-weight: 800;
+        }
+        .op-modal-desc { color: #475569; font-size: 14px; margin: 0 0 20px; }
+        .op-pwd-input {
+            width: 100%; border: 1px solid #dbe3ef; border-radius: 12px;
+            padding: 12px 14px; font-size: 15px; outline: none;
+            transition: 0.15s; box-sizing: border-box;
+        }
+        .op-pwd-input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.12); }
+        .op-pwd-error {
+            color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca;
+            border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 10px;
+        }
+        .op-modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .op-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            border-radius: 8px; border: 1px solid transparent;
+            padding: 10px 18px; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.15s;
+        }
+        .op-btn-primary { background: #dc2626; color: white; }
+        .op-btn-primary:hover { background: #b91c1c; }
+        .op-btn-secondary { background: white; color: #0f172a; border-color: #dbe3ef; }
+        .op-btn-secondary:hover { background: #f8fafc; }
+
+        .op-overlay {
+            position: fixed; inset: 0; z-index: 9000;
+            background: #f1f5f9;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .op-header {
+            background: #0f172a; color: white;
+            padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; border-bottom: 3px solid #dc2626;
+        }
+        .op-professor-info { display: flex; align-items: center; gap: 14px; }
+        .op-professor-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: #1e293b; border: 2px solid #dc2626;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .op-professor-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; }
+        .op-professor-name { font-size: 15px; font-weight: 800; color: white; }
+        .op-header-actions { display: flex; gap: 8px; align-items: center; }
+        .op-action-btn {
+            background: #1e293b; color: white; border: 1px solid #334155;
+            border-radius: 8px; padding: 7px 13px; font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: 0.15s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .op-action-btn:hover { background: #334155; }
+        .op-action-btn.op-btn-danger { border-color: #7f1d1d; color: #fca5a5; }
+        .op-action-btn.op-btn-danger:hover { background: #7f1d1d; }
+
+        .op-body {
+            display: grid; grid-template-columns: 42% 58%;
+            flex: 1; overflow: hidden;
+        }
+        .op-files-pane {
+            display: flex; flex-direction: column;
+            background: white; border-right: 1px solid #e2e8f0; overflow: hidden;
+        }
+        .op-chat-pane {
+            display: flex; flex-direction: column;
+            background: #fafbfc; overflow: hidden;
+        }
+        .op-pane-header {
+            padding: 12px 16px 10px; border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc; flex-shrink: 0;
+        }
+        .op-pane-title { font-size: 14px; font-weight: 800; margin: 0; }
+        .op-files-toolbar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .op-tool-btn {
+            background: white; color: #0f172a; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 6px 11px; font-size: 12px; font-weight: 700;
+            cursor: pointer; transition: 0.15s;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .op-tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .op-tool-btn.op-danger:hover { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+
+        .op-breadcrumb {
+            padding: 8px 16px; font-size: 12px; color: #475569;
+            border-bottom: 1px solid #f1f5f9; background: #fafbfc;
+            flex-shrink: 0; white-space: nowrap; overflow-x: auto;
+        }
+        .op-breadcrumb .op-bc-link { cursor: pointer; color: #3b82f6; }
+        .op-breadcrumb .op-bc-link:hover { text-decoration: underline; }
+
+        .op-file-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .op-file-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; border-radius: 8px; cursor: pointer;
+            transition: 0.12s; border: 1px solid transparent;
+        }
+        .op-file-item:hover { background: #f1f5f9; border-color: #e2e8f0; }
+        .op-file-item.op-selected { background: #eff6ff; border-color: #bfdbfe; }
+        .op-file-icon { font-size: 18px; flex-shrink: 0; width: 26px; text-align: center; }
+        .op-file-info { flex: 1; min-width: 0; }
+        .op-file-name {
+            font-size: 13px; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #0f172a;
+        }
+        .op-file-meta { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+        .op-file-acts { display: flex; gap: 4px; opacity: 0; transition: 0.12s; }
+        .op-file-item:hover .op-file-acts { opacity: 1; }
+        .op-file-act {
+            background: none; border: 1px solid #e2e8f0; border-radius: 6px;
+            padding: 3px 7px; font-size: 12px; cursor: pointer; color: #475569; transition: 0.12s;
+        }
+        .op-file-act:hover { background: #f1f5f9; }
+        .op-file-act.op-del:hover { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .op-empty { padding: 36px 20px; text-align: center; color: #94a3b8; font-size: 14px; }
+        .op-loading-msg { padding: 20px; text-align: center; color: #94a3b8; font-size: 14px; }
+
+        .op-chat-subheader {
+            display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap;
+        }
+        .op-role-label { font-size: 12px; color: #475569; font-weight: 600; }
+        .op-role-select {
+            border: 1px solid #e2e8f0; border-radius: 8px;
+            padding: 4px 10px; font-size: 12px; background: white; cursor: pointer;
+        }
+        .op-chat-messages {
+            flex: 1; overflow-y: auto; padding: 16px;
+            display: flex; flex-direction: column; gap: 12px;
+        }
+        .op-msg { display: flex; flex-direction: column; max-width: 78%; }
+        .op-msg.aluno { align-self: flex-end; align-items: flex-end; }
+        .op-msg.orientador { align-self: flex-start; align-items: flex-start; }
+        .op-msg-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .op-msg-author { font-size: 11px; font-weight: 700; }
+        .op-msg.aluno .op-msg-author { color: #7c3aed; }
+        .op-msg.orientador .op-msg-author { color: #0369a1; }
+        .op-msg-time { font-size: 10px; color: #94a3b8; }
+        .op-msg-bubble {
+            padding: 10px 14px; border-radius: 14px;
+            font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+        }
+        .op-msg.aluno .op-msg-bubble {
+            background: #7c3aed; color: white; border-bottom-right-radius: 4px;
+        }
+        .op-msg.orientador .op-msg-bubble {
+            background: white; color: #0f172a; border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .op-chat-input-area {
+            padding: 12px 16px; border-top: 1px solid #e2e8f0; background: white;
+            display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0;
+        }
+        .op-chat-textarea {
+            flex: 1; border: 1px solid #e2e8f0; border-radius: 12px;
+            padding: 10px 14px; font-size: 14px; resize: none; outline: none;
+            line-height: 1.5; font-family: inherit; min-height: 44px; max-height: 120px; transition: 0.15s;
+        }
+        .op-chat-textarea:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+        .op-send-btn {
+            background: #7c3aed; color: white; border: none;
+            border-radius: 10px; padding: 10px 18px; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: 0.15s; flex-shrink: 0;
+        }
+        .op-send-btn:hover { background: #6d28d9; }
+        .op-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media (max-width: 800px) {
+            .op-body { grid-template-columns: 1fr; grid-template-rows: 50% 50%; }
+            .op-files-pane { border-right: none; border-bottom: 1px solid #e2e8f0; }
+        }
     </style>
 </head>
 <body>
@@ -404,6 +597,7 @@
             </div>
 
             <button class="button report-cta" type="button" id="report-button-sidebar">Gerar relatório acadêmico</button>
+            <button class="button btn-orientador" type="button" id="orientador-btn">🎓 Espaço do Orientador</button>
 
             <form method="get" id="filters-form">
                 <div class="panel">
@@ -725,6 +919,405 @@
 
         reportButton.addEventListener('click', openReport);
         reportButtonSidebar.addEventListener('click', openReport);
+    </script>
+
+    <!-- ─── Modal: senha do orientador ─────────────────────────────────── -->
+    <div id="op-modal" class="op-modal-bg" style="display:none">
+        <div class="op-modal-box">
+            <div class="op-modal-title">🔒 Espaço do Orientador</div>
+            <p class="op-modal-desc">Área restrita. Digite a senha de acesso para continuar.</p>
+            <input type="password" id="op-pwd" class="op-pwd-input" placeholder="Senha de acesso" autocomplete="current-password">
+            <div id="op-pwd-error" class="op-pwd-error" style="display:none">Senha incorreta. Tente novamente.</div>
+            <div class="op-modal-footer">
+                <button class="op-btn op-btn-secondary" id="op-cancel-btn">Cancelar</button>
+                <button class="op-btn op-btn-primary" id="op-enter-btn">Entrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Overlay: Espaço do Orientador ──────────────────────────────── -->
+    <div id="op-overlay" class="op-overlay" style="display:none">
+
+        <div class="op-header">
+            <div class="op-professor-info">
+                <div class="op-professor-avatar">🎓</div>
+                <div>
+                    <div class="op-professor-label">Espaço do Orientador</div>
+                    <div class="op-professor-name">Dr. José Everardo Bessa Maia</div>
+                </div>
+            </div>
+            <div class="op-header-actions">
+                <button class="op-action-btn" id="op-refresh-btn">↻ Atualizar</button>
+                <button class="op-action-btn op-btn-danger" id="op-logout-btn">⎋ Sair</button>
+                <button class="op-action-btn" id="op-close-btn">✕ Fechar</button>
+            </div>
+        </div>
+
+        <div class="op-body">
+
+            <!-- Painel: explorador de arquivos -->
+            <div class="op-files-pane">
+                <div class="op-pane-header">
+                    <div class="op-pane-title">📁 Explorador de Arquivos</div>
+                    <div class="op-files-toolbar">
+                        <button class="op-tool-btn" id="op-upload-btn">⬆ Enviar</button>
+                        <button class="op-tool-btn" id="op-mkdir-btn">📁+ Nova pasta</button>
+                        <button class="op-tool-btn op-danger" id="op-delete-btn" style="display:none">🗑 Excluir</button>
+                        <input type="file" id="op-file-input" multiple style="display:none">
+                    </div>
+                </div>
+                <div class="op-breadcrumb" id="op-breadcrumb">
+                    <span class="op-bc-link" data-path="">Início</span>
+                </div>
+                <div class="op-file-list" id="op-file-list">
+                    <div class="op-loading-msg">Carregando…</div>
+                </div>
+            </div>
+
+            <!-- Painel: chat -->
+            <div class="op-chat-pane">
+                <div class="op-pane-header">
+                    <div class="op-pane-title">💬 Canal de Orientação</div>
+                    <div class="op-chat-subheader">
+                        <span class="op-role-label">Enviar como:</span>
+                        <select id="op-chat-role" class="op-role-select">
+                            <option value="aluno">Aluno (Boanerges)</option>
+                            <option value="orientador">Orientador</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="op-chat-messages" id="op-chat-messages">
+                    <div class="op-loading-msg">Carregando mensagens…</div>
+                </div>
+                <div class="op-chat-input-area">
+                    <textarea id="op-chat-textarea" class="op-chat-textarea" placeholder="Digite uma mensagem… (Enter para enviar, Shift+Enter para nova linha)" rows="2"></textarea>
+                    <button id="op-send-btn" class="op-send-btn">Enviar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    // ─── Orientador Space ──────────────────────────────────────────────────
+
+    const opModal       = document.getElementById('op-modal');
+    const opOverlay     = document.getElementById('op-overlay');
+    const opPwd         = document.getElementById('op-pwd');
+    const opPwdError    = document.getElementById('op-pwd-error');
+    const opCancelBtn   = document.getElementById('op-cancel-btn');
+    const opEnterBtn    = document.getElementById('op-enter-btn');
+    const opRefreshBtn  = document.getElementById('op-refresh-btn');
+    const opLogoutBtn   = document.getElementById('op-logout-btn');
+    const opCloseBtn    = document.getElementById('op-close-btn');
+    const opBreadcrumb  = document.getElementById('op-breadcrumb');
+    const opFileList    = document.getElementById('op-file-list');
+    const opUploadBtn   = document.getElementById('op-upload-btn');
+    const opMkdirBtn    = document.getElementById('op-mkdir-btn');
+    const opDeleteBtn   = document.getElementById('op-delete-btn');
+    const opFileInput   = document.getElementById('op-file-input');
+    const opChatMsgs    = document.getElementById('op-chat-messages');
+    const opChatTA      = document.getElementById('op-chat-textarea');
+    const opSendBtn     = document.getElementById('op-send-btn');
+    const opChatRole    = document.getElementById('op-chat-role');
+    const orientadorBtn = document.getElementById('orientador-btn');
+
+    let opCurrentPath   = '';
+    let opSelectedItem  = null;
+
+    // ── Modal ──────────────────────────────────────────────────────────────
+    function opShowModal() {
+        opModal.style.display = 'flex';
+        opPwd.value = '';
+        opPwdError.style.display = 'none';
+        setTimeout(() => opPwd.focus(), 50);
+    }
+    function opHideModal() { opModal.style.display = 'none'; }
+
+    async function opLogin() {
+        const pwd = opPwd.value;
+        if (!pwd) return;
+        opEnterBtn.disabled = true;
+        opEnterBtn.textContent = 'Entrando…';
+        try {
+            const res = await fetch('/orientador/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pwd }),
+            });
+            const d = await res.json();
+            if (d.ok) {
+                opModal.style.display = 'none';
+                opOverlay.style.display = 'flex';
+                opCurrentPath = '';
+                opLoadFiles('');
+                opLoadChat();
+            } else {
+                opPwdError.textContent = 'Senha incorreta. Tente novamente.';
+                opPwdError.style.display = 'block';
+                opPwd.focus();
+            }
+        } catch {
+            opPwdError.textContent = 'Erro de conexão. Tente novamente.';
+            opPwdError.style.display = 'block';
+        } finally {
+            opEnterBtn.disabled = false;
+            opEnterBtn.textContent = 'Entrar';
+        }
+    }
+
+    async function opLogout() {
+        await fetch('/orientador/logout', { method: 'POST' }).catch(() => {});
+        opOverlay.style.display = 'none';
+    }
+
+    // ── File Explorer ──────────────────────────────────────────────────────
+    function opFmtSize(b) {
+        if (b == null) return '';
+        if (b < 1024) return b + ' B';
+        if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+        return (b / 1048576).toFixed(1) + ' MB';
+    }
+
+    function opFileIcon(name, isDir) {
+        if (isDir) return '📁';
+        const ext = name.split('.').pop().toLowerCase();
+        return { pdf:'📄', doc:'📝', docx:'📝', txt:'📝',
+                 xls:'📊', xlsx:'📊', csv:'📊',
+                 png:'🖼', jpg:'🖼', jpeg:'🖼', gif:'🖼',
+                 zip:'🗜', rar:'🗜', gz:'🗜',
+                 py:'🐍', js:'📜', html:'🌐', css:'🎨',
+                 json:'⚙️', md:'📋' }[ext] || '📄';
+    }
+
+    async function opLoadFiles(path) {
+        opCurrentPath = path || '';
+        opSelectedItem = null;
+        opDeleteBtn.style.display = 'none';
+        opFileList.innerHTML = '<div class="op-loading-msg">Carregando…</div>';
+
+        // breadcrumb
+        const parts = opCurrentPath ? opCurrentPath.split('/') : [];
+        let bc = '<span class="op-bc-link" data-path="">Início</span>';
+        parts.forEach((p, i) => {
+            const sub = parts.slice(0, i + 1).join('/');
+            bc += ' / <span class="op-bc-link" data-path="' + sub + '">' + p + '</span>';
+        });
+        opBreadcrumb.innerHTML = bc;
+        opBreadcrumb.querySelectorAll('.op-bc-link').forEach(s =>
+            s.addEventListener('click', () => opLoadFiles(s.dataset.path)));
+
+        try {
+            const res = await fetch('/orientador/api/files?path=' + encodeURIComponent(opCurrentPath));
+            if (res.status === 401) { opOverlay.style.display = 'none'; return; }
+            const data = await res.json();
+
+            opFileList.innerHTML = '';
+
+            // "go up" row
+            if (opCurrentPath) {
+                const parent = opCurrentPath.includes('/')
+                    ? opCurrentPath.substring(0, opCurrentPath.lastIndexOf('/'))
+                    : '';
+                const up = document.createElement('div');
+                up.className = 'op-file-item';
+                up.innerHTML = '<span class="op-file-icon">⬆</span>'
+                    + '<div class="op-file-info"><div class="op-file-name" style="color:#475569">..</div>'
+                    + '<div class="op-file-meta">Voltar</div></div>';
+                up.addEventListener('click', () => opLoadFiles(parent));
+                opFileList.appendChild(up);
+            }
+
+            if (data.items.length === 0 && !opCurrentPath) {
+                opFileList.innerHTML = '<div class="op-empty">📂 Pasta vazia.<br>Use "Enviar" para adicionar arquivos.</div>';
+                return;
+            }
+
+            data.items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'op-file-item';
+                const meta = item.is_dir ? 'Pasta' : (opFmtSize(item.size) + ' · ' + item.modified);
+                const dlBtn = !item.is_dir
+                    ? `<button class="op-file-act" data-action="dl" data-path="${item.path}" title="Baixar">⬇</button>`
+                    : '';
+                el.innerHTML = `
+                    <span class="op-file-icon">${opFileIcon(item.name, item.is_dir)}</span>
+                    <div class="op-file-info">
+                        <div class="op-file-name">${item.name}</div>
+                        <div class="op-file-meta">${meta}</div>
+                    </div>
+                    <div class="op-file-acts">
+                        ${dlBtn}
+                        <button class="op-file-act op-del" data-action="del" data-path="${item.path}" title="Excluir">🗑</button>
+                    </div>`;
+
+                el.addEventListener('click', e => {
+                    if (e.target.dataset.action) return;
+                    if (item.is_dir) { opLoadFiles(item.path); return; }
+                    document.querySelectorAll('.op-file-item.op-selected').forEach(s => s.classList.remove('op-selected'));
+                    if (opSelectedItem === item.path) {
+                        opSelectedItem = null;
+                        opDeleteBtn.style.display = 'none';
+                    } else {
+                        el.classList.add('op-selected');
+                        opSelectedItem = item.path;
+                        opDeleteBtn.style.display = 'inline-flex';
+                    }
+                });
+
+                el.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', async e => {
+                        e.stopPropagation();
+                        if (btn.dataset.action === 'dl') {
+                            window.open('/orientador/api/download?path=' + encodeURIComponent(btn.dataset.path), '_blank');
+                        } else if (btn.dataset.action === 'del') {
+                            if (confirm('Excluir "' + item.name + '"?')) await opDeleteItem(btn.dataset.path);
+                        }
+                    });
+                });
+
+                opFileList.appendChild(el);
+            });
+
+            if (data.items.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'op-empty';
+                empty.textContent = '📂 Pasta vazia.';
+                opFileList.appendChild(empty);
+            }
+        } catch {
+            opFileList.innerHTML = '<div class="op-empty">❌ Erro ao carregar arquivos.</div>';
+        }
+    }
+
+    async function opDeleteItem(path) {
+        const res = await fetch('/orientador/api/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path }),
+        });
+        const d = await res.json();
+        if (d.ok) opLoadFiles(opCurrentPath);
+        else alert('Erro ao excluir: ' + (d.error || '?'));
+    }
+
+    // ── Chat ───────────────────────────────────────────────────────────────
+    function opFmtTs(iso) {
+        try {
+            const d = new Date(iso);
+            return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+        } catch { return iso; }
+    }
+
+    function opRenderChat(messages) {
+        if (!messages.length) {
+            opChatMsgs.innerHTML = '<div class="op-loading-msg" style="color:#94a3b8">💬 Nenhuma mensagem ainda. Inicie a conversa!</div>';
+            return;
+        }
+        opChatMsgs.innerHTML = '';
+        messages.forEach(msg => {
+            const el = document.createElement('div');
+            el.className = 'op-msg ' + msg.author;
+            const label = msg.author === 'orientador' ? 'Dr. José Everardo' : 'Boanerges (Aluno)';
+            const safeText = msg.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            el.innerHTML = `
+                <div class="op-msg-meta">
+                    <span class="op-msg-author">${label}</span>
+                    <span class="op-msg-time">${opFmtTs(msg.timestamp)}</span>
+                </div>
+                <div class="op-msg-bubble">${safeText}</div>`;
+            opChatMsgs.appendChild(el);
+        });
+        opChatMsgs.scrollTop = opChatMsgs.scrollHeight;
+    }
+
+    async function opLoadChat() {
+        try {
+            const res = await fetch('/orientador/api/chat');
+            if (res.status === 401) return;
+            const d = await res.json();
+            opRenderChat(d.messages || []);
+        } catch {
+            opChatMsgs.innerHTML = '<div class="op-loading-msg">Erro ao carregar mensagens.</div>';
+        }
+    }
+
+    async function opSendMessage() {
+        const text = opChatTA.value.trim();
+        if (!text) return;
+        opSendBtn.disabled = true;
+        try {
+            const res = await fetch('/orientador/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, author: opChatRole.value }),
+            });
+            const d = await res.json();
+            if (d.ok) { opChatTA.value = ''; opLoadChat(); }
+        } catch { alert('Erro ao enviar mensagem.'); }
+        finally { opSendBtn.disabled = false; }
+    }
+
+    // ── Upload ─────────────────────────────────────────────────────────────
+    opFileInput.addEventListener('change', async () => {
+        if (!opFileInput.files.length) return;
+        const fd = new FormData();
+        fd.append('path', opCurrentPath);
+        for (const f of opFileInput.files) fd.append('files', f);
+        opFileInput.value = '';
+        try {
+            const res = await fetch('/orientador/api/upload', { method: 'POST', body: fd });
+            const d = await res.json();
+            if (d.ok) opLoadFiles(opCurrentPath);
+            else alert('Erro ao enviar: ' + (d.error || '?'));
+        } catch { alert('Erro de conexão ao enviar.'); }
+    });
+
+    // ── Event bindings ─────────────────────────────────────────────────────
+    orientadorBtn.addEventListener('click', opShowModal);
+    opCancelBtn.addEventListener('click', opHideModal);
+    opEnterBtn.addEventListener('click', opLogin);
+    opPwd.addEventListener('keydown', e => { if (e.key === 'Enter') opLogin(); });
+    opModal.addEventListener('click', e => { if (e.target === opModal) opHideModal(); });
+
+    opRefreshBtn.addEventListener('click', () => { opLoadFiles(opCurrentPath); opLoadChat(); });
+    opLogoutBtn.addEventListener('click', opLogout);
+    opCloseBtn.addEventListener('click', () => { opOverlay.style.display = 'none'; });
+
+    opUploadBtn.addEventListener('click', () => opFileInput.click());
+    opMkdirBtn.addEventListener('click', async () => {
+        const name = prompt('Nome da nova pasta:');
+        if (!name || !name.trim()) return;
+        const path = opCurrentPath ? opCurrentPath + '/' + name.trim() : name.trim();
+        try {
+            const res = await fetch('/orientador/api/mkdir', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path }),
+            });
+            const d = await res.json();
+            if (d.ok) opLoadFiles(opCurrentPath);
+        } catch { alert('Erro ao criar pasta.'); }
+    });
+    opDeleteBtn.addEventListener('click', async () => {
+        if (opSelectedItem && confirm('Excluir item selecionado?')) {
+            await opDeleteItem(opSelectedItem);
+            opSelectedItem = null;
+            opDeleteBtn.style.display = 'none';
+        }
+    });
+
+    opSendBtn.addEventListener('click', opSendMessage);
+    opChatTA.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); opSendMessage(); }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            if (opModal.style.display !== 'none') opHideModal();
+            else if (opOverlay.style.display !== 'none') opOverlay.style.display = 'none';
+        }
+    });
     </script>
 </body>
 </html>
