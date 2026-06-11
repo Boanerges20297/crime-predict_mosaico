@@ -1,7 +1,9 @@
 import json
 import math
 import os
+import re
 import time
+import unicodedata
 from html import escape
 from dataclasses import dataclass
 
@@ -10,6 +12,7 @@ import pandas as pd
 from branca.colormap import LinearColormap
 from folium import FeatureGroup, LayerControl
 from folium.plugins import FastMarkerCluster
+from shapely.geometry import shape
 
 from benchmark_models import train_model_and_forecast
 from genetic_algorithm import GeneticAlgorithmHex
@@ -42,8 +45,24 @@ KM_PER_LAT_DEGREE = 111.32
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BEST_GRID_PATH = os.path.join(BASE_DIR, "data", "processed", "best_hex_grid.json")
 BENCHMARK_JSON_PATH = os.path.join(BASE_DIR, "data", "processed", "benchmark_cvli_hex_models.json")
+BAIRRO_POLYGONS_PATH = os.path.join(BASE_DIR, "data", "static", "bairros_fortaleza.geojson")
 _CACHE = {}
 _ANALYSIS_CACHE = {}
+_BAIRRO_POLYGONS = None
+_BAIRRO_NAME_ALIASES = {
+    "BOA VISTA": "BOA VISTA / CASTELAO",
+    "CASTELAO": "BOA VISTA / CASTELAO",
+    "DENDE": "DENDE",
+    "GENTILANDIA": "BENFICA",
+    "JANGURURSSU": "JANGURUSSU",
+    "PATRIOLINO RIBEIRO": "GUARARAPES",
+    "PRAIA DO FURUTO II": "PRAIA DO FUTURO II",
+    "PRAIA DE IRACEMA": "PRAIA DE IRACEMA",
+    "SAPIRANGA COITE": "SAPIRANGA / COITE",
+    "SAO JOAO DO TAUAPE": "TAUAPE",
+    "VILA ELLERY": "ELLERY",
+    "VILA PERY": "VILA PERI",
+}
 
 
 @dataclass
@@ -55,6 +74,48 @@ class AnalysisResult:
     map_html: str | None
     error: str | None = None
     from_cache: bool = False
+
+
+def _normalize_region_name(value):
+    text = "" if value is None else str(value)
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    text = text.upper().strip()
+    return re.sub(r"\s+", " ", text)
+
+
+def _normalize_bairro_layer_name(value):
+    normalized = _normalize_region_name(value)
+    aliased = _BAIRRO_NAME_ALIASES.get(normalized, normalized)
+    return _normalize_region_name(aliased)
+
+
+def load_bairro_polygons():
+    global _BAIRRO_POLYGONS
+    if _BAIRRO_POLYGONS is not None:
+        return _BAIRRO_POLYGONS
+
+    with open(BAIRRO_POLYGONS_PATH, "r", encoding="utf-8") as file:
+        payload = json.load(file)
+
+    polygons = {}
+    for feature in payload.get("features", []):
+        properties = feature.get("properties", {})
+        geometry = feature.get("geometry")
+        if not geometry or geometry.get("type") not in {"Polygon", "MultiPolygon", "Polygon"}:
+            continue
+
+        display_name = str(properties.get("Name", "")).split(" - AIS ")[0].strip()
+        normalized_name = _normalize_bairro_layer_name(display_name)
+        if not normalized_name:
+            continue
+
+        polygons[normalized_name] = {
+            "name": display_name,
+            "geometry": shape(geometry),
+        }
+
+    _BAIRRO_POLYGONS = polygons
+    return _BAIRRO_POLYGONS
 
 
 def load_base_dataframe():
@@ -103,7 +164,7 @@ def filter_dataframe(df, bairros=None, start_date=None, end_date=None):
     return filtered
 
 
-def build_cache_key(selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points):
+def build_cache_key(selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap):
     return (
         _normalize_bairros(selected_bairros),
         str(start_date or ""),
@@ -112,6 +173,7 @@ def build_cache_key(selected_bairros, start_date, end_date, pop_size, generation
         int(generations),
         bool(hide_sparse_hexes),
         bool(show_cvli_points),
+        bool(show_bairro_heatmap),
     )
 
 
@@ -229,7 +291,7 @@ def _build_cvli_pin_html():
     """
 
 
-def _build_map_legend_html(show_cvli_points=False):
+def _build_map_legend_html(show_cvli_points=False, show_bairro_heatmap=False):
     cluster_section = ""
     if show_cvli_points:
         cluster_section = """
@@ -246,6 +308,34 @@ def _build_map_legend_html(show_cvli_points=False):
             <div style="display:flex; align-items:center; gap:8px;">
                 <span style="width:20px; height:20px; border-radius:50%; background:#7e22ce; display:inline-block; box-shadow:0 0 0 6px rgba(239,68,68,0.30);"></span>
                 <span>Alta densidade no filtro</span>
+            </div>
+        </div>
+        """
+
+    bairro_section = ""
+    if show_bairro_heatmap:
+        bairro_section = """
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0;">
+            <div style="font-weight:700; margin-bottom:6px;">Intensidade por bairro</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="width:16px; height:16px; border-radius:4px; background:#f7f3df; border:1px solid #e6debb; display:inline-block;"></span>
+                <span>Zero CVLI no recorte</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="width:16px; height:16px; border-radius:4px; background:#f3e7a1; border:1px solid #d6c979; display:inline-block;"></span>
+                <span>Baixo histórico de CVLI</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="width:16px; height:16px; border-radius:4px; background:#e8c97a; border:1px solid #d0ae55; display:inline-block;"></span>
+                <span>Médio histórico de CVLI</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                <span style="width:16px; height:16px; border-radius:4px; background:#d99a5e; border:1px solid #c27f43; display:inline-block;"></span>
+                <span>Alto histórico de CVLI</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:16px; height:16px; border-radius:4px; background:#b42318; border:1px solid #7f1d1d; display:inline-block;"></span>
+                <span>Altíssimo histórico de CVLI</span>
             </div>
         </div>
         """
@@ -281,6 +371,7 @@ def _build_map_legend_html(show_cvli_points=False):
             <span style="width:16px; height:16px; border-radius:4px; background:#ef4444; border:1px solid #7e22ce; display:inline-block;"></span>
             <span>Maior concentracao de CVLI</span>
         </div>
+        {bairro_section}
         {cluster_section}
     </div>
     """
@@ -309,6 +400,7 @@ def build_map(
     hex_summary=None,
     forecast_df=None,
     show_cvli_points=False,
+    show_bairro_heatmap=False,
 ):
     lat_center = df_records["latitude"].mean()
     lon_center = df_records["longitude"].mean()
@@ -316,6 +408,7 @@ def build_map(
 
     group_hex = FeatureGroup(name="Hexágonos ótimos", show=True)
     group_bairros = FeatureGroup(name="Centroides de bairros", show=False)
+    group_bairro_heatmap = FeatureGroup(name="Histórico de CVLI por bairro", show=show_bairro_heatmap)
 
     hex_counts = df_hex["hex_id"].value_counts().to_dict()
     max_count = max(hex_counts.values()) if hex_counts else 1
@@ -504,6 +597,60 @@ def build_map(
             },
         ).add_to(map_object)
 
+    if show_bairro_heatmap:
+        bairro_polygons = load_bairro_polygons()
+        bairro_counts = (
+            df_records["bairro"]
+            .fillna("")
+            .astype(str)
+            .map(_normalize_bairro_layer_name)
+            .value_counts()
+            .to_dict()
+        )
+        positive_counts = sorted(count for count in bairro_counts.values() if count > 0)
+        if positive_counts:
+            low_threshold = positive_counts[max(0, int(len(positive_counts) * 0.25) - 1)]
+            mid_threshold = positive_counts[max(0, int(len(positive_counts) * 0.50) - 1)]
+            high_threshold = positive_counts[max(0, int(len(positive_counts) * 0.75) - 1)]
+        else:
+            low_threshold = 0
+            mid_threshold = 0
+            high_threshold = 0
+
+        def get_bairro_fill(count):
+            if count <= 0:
+                return "#f7f3df", 0.20
+            if count <= low_threshold:
+                return "#f3e7a1", 0.30
+            if count <= mid_threshold:
+                return "#e8c97a", 0.38
+            if count <= high_threshold:
+                return "#d99a5e", 0.47
+            return "#b42318", 0.56
+
+        for bairro_key, polygon_entry in bairro_polygons.items():
+            count = int(bairro_counts.get(bairro_key, 0))
+            fill_color, fill_opacity = get_bairro_fill(count)
+            popup_content = (
+                "<div class='cvli-popup'>"
+                f"<b>{escape(polygon_entry['name'])}</b><br>"
+                f"CVLI no filtro atual: {int(count)}"
+                "</div>"
+            )
+
+            for polygon in iter_polygon_parts(polygon_entry["geometry"]):
+                coords = [[coord[1], coord[0]] for coord in polygon.exterior.coords]
+                folium.Polygon(
+                    locations=coords,
+                    color="#991B1B",
+                    weight=1.1,
+                    fill=True,
+                    fill_color=fill_color,
+                    fill_opacity=fill_opacity,
+                    popup=folium.Popup(popup_content, max_width=320),
+                    tooltip=f"{polygon_entry['name']}: {int(count)} CVLI",
+                ).add_to(group_bairro_heatmap)
+
     bairro_centroids = df_records.groupby("bairro")[["latitude", "longitude"]].mean()
     bairro_counts = df_records["bairro"].value_counts()
     for bairro_name, row in bairro_centroids.iterrows():
@@ -520,8 +667,17 @@ def build_map(
 
     group_hex.add_to(map_object)
     group_bairros.add_to(map_object)
+    if show_bairro_heatmap:
+        group_bairro_heatmap.add_to(map_object)
     LayerControl(collapsed=False).add_to(map_object)
-    map_object.get_root().html.add_child(folium.Element(_build_map_legend_html(show_cvli_points=show_cvli_points)))
+    map_object.get_root().html.add_child(
+        folium.Element(
+            _build_map_legend_html(
+                show_cvli_points=show_cvli_points,
+                show_bairro_heatmap=show_bairro_heatmap,
+            )
+        )
+    )
     return map_object._repr_html_()
 
 
@@ -534,9 +690,19 @@ def analyze_filters(
     generations=DEFAULT_GENERATIONS,
     hide_sparse_hexes=False,
     show_cvli_points=False,
+    show_bairro_heatmap=False,
 ):
     selected_bairros = list(selected_bairros or [])
-    cache_key = build_cache_key(selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points)
+    cache_key = build_cache_key(
+        selected_bairros,
+        start_date,
+        end_date,
+        pop_size,
+        generations,
+        hide_sparse_hexes,
+        show_cvli_points,
+        show_bairro_heatmap,
+    )
     if cache_key in _CACHE:
         cached = _CACHE[cache_key]
         return AnalysisResult(**(cached | {"from_cache": True}))
@@ -552,6 +718,7 @@ def analyze_filters(
         "generations": int(generations),
         "hide_sparse_hexes": bool(hide_sparse_hexes),
         "show_cvli_points": bool(show_cvli_points),
+        "show_bairro_heatmap": bool(show_bairro_heatmap),
     }
 
     if df_filtered.empty:
@@ -655,6 +822,7 @@ def analyze_filters(
         hex_summary=hex_summary,
         forecast_df=forecast_df,
         show_cvli_points=show_cvli_points,
+        show_bairro_heatmap=show_bairro_heatmap,
     )
     payload = {
         "filters": filters,

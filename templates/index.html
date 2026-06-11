@@ -651,6 +651,14 @@
                         <div class="helper">Agrupa apenas os CVLI mais recentes do recorte atual, reduzindo poluição visual sobre a colmeia.</div>
                     </div>
 
+                    <div class="field" style="margin-top:4px;">
+                        <label style="display:flex; align-items:center; gap:10px; font-weight:600;">
+                            <input type="checkbox" name="show_bairro_heatmap" value="1" {% if show_bairro_heatmap %}checked{% endif %} style="width:auto; margin:0;">
+                            Mostrar intensidade histórica de CVLI por bairro
+                        </label>
+                        <div class="helper">Pinta os bairros do recorte atual: quanto mais escuro e vermelho, maior o volume histórico de CVLI.</div>
+                    </div>
+
                     <div class="quick-actions" style="margin-top:8px;">
                         <button class="button primary" type="submit">Aplicar filtros e recalcular</button>
                         <a class="button-link secondary" href="/">Limpar tudo</a>
@@ -818,7 +826,7 @@
         const selectAllBairrosButton = document.getElementById('select-all-bairros');
         const selectVisibleButton = document.getElementById('select-visible');
         const filtersForm = document.getElementById('filters-form');
-        const autoSubmitCheckboxes = Array.from(document.querySelectorAll('input[name="hide_sparse_hexes"], input[name="show_cvli_points"]'));
+        const autoSubmitCheckboxes = Array.from(document.querySelectorAll('input[name="hide_sparse_hexes"], input[name="show_cvli_points"], input[name="show_bairro_heatmap"]'));
         const mapFrameContent = document.getElementById('map-frame-content');
         const feedbackRegion = document.getElementById('feedback-region');
         const reportButton = document.getElementById('report-button');

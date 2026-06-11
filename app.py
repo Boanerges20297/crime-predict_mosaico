@@ -85,11 +85,12 @@ def read_filter_args():
     generations = int(request.args.get("generations", DEFAULT_GENERATIONS))
     hide_sparse_hexes = request.args.get("hide_sparse_hexes") == "1"
     show_cvli_points = request.args.get("show_cvli_points") == "1"
-    return selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points
+    show_bairro_heatmap = request.args.get("show_bairro_heatmap") == "1"
+    return selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap
 
 
 def build_analysis_from_request():
-    selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points = read_filter_args()
+    selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap = read_filter_args()
     result = analyze_filters(
         BASE_DF,
         selected_bairros=selected_bairros,
@@ -99,14 +100,15 @@ def build_analysis_from_request():
         generations=generations,
         hide_sparse_hexes=hide_sparse_hexes,
         show_cvli_points=show_cvli_points,
+        show_bairro_heatmap=show_bairro_heatmap,
     )
     has_active_filters = bool(selected_bairros or start_date or end_date)
-    return result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, has_active_filters
+    return result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters
 
 
 @app.route("/", methods=["GET"])
 def index():
-    result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, has_active_filters = build_analysis_from_request()
+    result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters = build_analysis_from_request()
 
     if request.args.get("partial") == "1":
         return jsonify({
@@ -125,6 +127,7 @@ def index():
         has_active_filters=has_active_filters,
         hide_sparse_hexes=hide_sparse_hexes,
         show_cvli_points=show_cvli_points,
+        show_bairro_heatmap=show_bairro_heatmap,
         pop_size=pop_size,
         generations=generations,
         start_date=start_date,
@@ -134,7 +137,7 @@ def index():
 
 @app.route("/relatorio", methods=["GET"])
 def report():
-    result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, has_active_filters = build_analysis_from_request()
+    result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters = build_analysis_from_request()
 
     return render_template(
         "report.html",
@@ -144,6 +147,7 @@ def report():
         has_active_filters=has_active_filters,
         hide_sparse_hexes=hide_sparse_hexes,
         show_cvli_points=show_cvli_points,
+        show_bairro_heatmap=show_bairro_heatmap,
         pop_size=pop_size,
         generations=generations,
         start_date=start_date,
