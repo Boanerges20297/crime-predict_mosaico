@@ -377,6 +377,65 @@ def _build_map_legend_html(show_cvli_points=False, show_bairro_heatmap=False):
     """
 
 
+def _build_popup_style_html():
+    return """
+    <style>
+        .leaflet-popup-content-wrapper {
+            border-radius: 14px;
+        }
+        .leaflet-popup-content {
+            margin: 12px 14px;
+        }
+        .cvli-popup {
+            min-width: 280px;
+            max-width: 340px;
+            font-family: Inter, Arial, sans-serif;
+            font-size: 13px;
+            line-height: 1.45;
+            color: #1f2937;
+        }
+        .cvli-popup-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+        .cvli-popup-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            margin-bottom: 10px;
+        }
+        .cvli-popup-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .cvli-popup-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #6b7280;
+        }
+        .cvli-popup-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111827;
+        }
+        .cvli-popup-section {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        .cvli-popup-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+        }
+    </style>
+    """
+
+
 def estimate_hex_dimensions_km(radius_degrees, latitude):
     km_per_lon_degree = KM_PER_LAT_DEGREE * math.cos(math.radians(latitude))
     radius_km = radius_degrees * (KM_PER_LAT_DEGREE + km_per_lon_degree) / 2
@@ -460,23 +519,29 @@ def build_map(
         model_name = str(hex_forecast.get("modelo_previsao", "poisson"))
         trend_label = "alta" if trend_1 > 0 else "queda" if trend_1 < 0 else "estável"
         popup_html = (
-            f"<b>Hexágono {hex_id}</b><br>"
-            f"CVLI total: {total_cvli}<br>"
-            f"Semanas ativas: {active_weeks} / {total_weeks}<br>"
-            f"Taxa de atividade: {activity_ratio:.2%}<br>"
-            f"Média CVLI por semana ativa: {avg_cvli_week:.2f}<br>"
-            f"Última semana observada: {last_week}<br>"
-            f"Última contagem semanal: {last_count}<br>"
-            f"MM4 (histórico recente): {moving_avg_4:.2f}<br>"
-            f"Tendência recente: {trend_label} ({trend_1:+.2f})<br>"
-            f"Previsão próxima semana: {forecast_value:.3f}<br>"
-            f"Modelo preditivo: {model_name}<br>"
-            f"Esparso: {'Sim' if sparse_lookup.get(hex_id, False) else 'Não'}<br>"
-            f"Raio R: {grid.R:.6f}° (~{hex_dimensions['radius_km']:.2f} km)<br>"
-            f"Largura aprox.: {hex_dimensions['width_km']:.2f} km<br>"
-            f"Altura aprox.: {hex_dimensions['height_km']:.2f} km<br>"
-            f"Área aprox.: {hex_dimensions['area_km2']:.2f} km²<br>"
-            f"Hexágonos criados na malha: {len(grid.hexagons)}"
+            "<div class='cvli-popup'>"
+            f"<div class='cvli-popup-title'>Hexágono {hex_id}</div>"
+            "<div class='cvli-popup-grid'>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>CVLI total</span><span class='cvli-popup-value'>{total_cvli}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Atividade</span><span class='cvli-popup-value'>{activity_ratio:.2%}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Semanas ativas</span><span class='cvli-popup-value'>{active_weeks} / {total_weeks}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Média semanal ativa</span><span class='cvli-popup-value'>{avg_cvli_week:.2f}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Última contagem</span><span class='cvli-popup-value'>{last_count}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Próxima semana</span><span class='cvli-popup-value'>{forecast_value:.3f}</span></div>"
+            "</div>"
+            "<div class='cvli-popup-section'>"
+            "<div class='cvli-popup-meta'>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Última semana</span><span class='cvli-popup-value'>{last_week}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Tendência</span><span class='cvli-popup-value'>{trend_label} ({trend_1:+.2f})</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>MM4</span><span class='cvli-popup-value'>{moving_avg_4:.2f}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Modelo</span><span class='cvli-popup-value'>{model_name}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Esparso</span><span class='cvli-popup-value'>{'Sim' if sparse_lookup.get(hex_id, False) else 'Não'}</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Área aprox.</span><span class='cvli-popup-value'>{hex_dimensions['area_km2']:.2f} km²</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Largura</span><span class='cvli-popup-value'>{hex_dimensions['width_km']:.2f} km</span></div>"
+            f"<div class='cvli-popup-item'><span class='cvli-popup-label'>Altura</span><span class='cvli-popup-value'>{hex_dimensions['height_km']:.2f} km</span></div>"
+            "</div>"
+            "</div>"
+            "</div>"
         )
 
         for polygon in iter_polygon_parts(geometry):
@@ -488,7 +553,7 @@ def build_map(
                 fill=True,
                 fill_color=fill_color,
                 fill_opacity=fill_opacity,
-                popup=popup_html,
+                popup=folium.Popup(popup_html, max_width=360),
             ).add_to(group_hex)
 
     if show_cvli_points:
@@ -670,6 +735,7 @@ def build_map(
     if show_bairro_heatmap:
         group_bairro_heatmap.add_to(map_object)
     LayerControl(collapsed=False).add_to(map_object)
+    map_object.get_root().header.add_child(folium.Element(_build_popup_style_html()))
     map_object.get_root().html.add_child(
         folium.Element(
             _build_map_legend_html(
