@@ -1,14 +1,14 @@
 # Experimento por Hexágonos com Cobertura de 95%
 
-- **Modelo selecionado:** `poisson`
-- **Unidades selecionadas (hexágonos):** 94
+- **Modelo selecionado:** `ridge`
+- **Unidades selecionadas (hexágonos):** 129
 - **Eventos totais:** 3105
 - **Eventos retidos:** 2956
 - **Cobertura atingida:** 0.9520
-- **Média do MSE:** 0.07523673999271882
-- **Variância do MSE:** 0.010837910098744097
-- **Média do MAE:** 0.17692930846073354
-- **Variância do MAE:** 0.012738627061937237
+- **Média do MSE:** 0.04760333598242885
+- **Variância do MSE:** 0.004600702171360321
+- **Média do MAE:** 0.1317093994092675
+- **Variância do MAE:** 0.007499511527375942
 
 ## Arquivos gerados
 

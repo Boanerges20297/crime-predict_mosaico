@@ -26,6 +26,7 @@ if os.path.exists(_env_path):
 
 from dashboard_service import (  # noqa: E402
     DEFAULT_GENERATIONS,
+    DEFAULT_MIN_HEX_COUNT_RATIO,
     DEFAULT_POP_SIZE,
     analyze_filters,
     get_available_bairros,
@@ -83,14 +84,17 @@ def read_filter_args():
     end_date = request.args.get("end_date", "")
     pop_size = int(request.args.get("pop_size", DEFAULT_POP_SIZE))
     generations = int(request.args.get("generations", DEFAULT_GENERATIONS))
+    min_hex_count_ratio = float(request.args.get("min_hex_count_ratio", DEFAULT_MIN_HEX_COUNT_RATIO))
+    min_hex_count_ratio = min(max(min_hex_count_ratio, 0.5), 0.95)
+    forecast_engine = "stgcn" if request.args.get("use_stgcn") == "1" else "default"
     hide_sparse_hexes = request.args.get("hide_sparse_hexes") == "1"
     show_cvli_points = request.args.get("show_cvli_points") == "1"
     show_bairro_heatmap = request.args.get("show_bairro_heatmap") == "1"
-    return selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap
+    return selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap
 
 
 def build_analysis_from_request():
-    selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap = read_filter_args()
+    selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap = read_filter_args()
     result = analyze_filters(
         BASE_DF,
         selected_bairros=selected_bairros,
@@ -98,17 +102,19 @@ def build_analysis_from_request():
         end_date=end_date or None,
         pop_size=pop_size,
         generations=generations,
+        min_hex_count_ratio=min_hex_count_ratio,
+        forecast_engine=forecast_engine,
         hide_sparse_hexes=hide_sparse_hexes,
         show_cvli_points=show_cvli_points,
         show_bairro_heatmap=show_bairro_heatmap,
     )
     has_active_filters = bool(selected_bairros or start_date or end_date)
-    return result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters
+    return result, selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters
 
 
 @app.route("/", methods=["GET"])
 def index():
-    result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters = build_analysis_from_request()
+    result, selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters = build_analysis_from_request()
 
     if request.args.get("partial") == "1":
         return jsonify({
@@ -130,6 +136,8 @@ def index():
         show_bairro_heatmap=show_bairro_heatmap,
         pop_size=pop_size,
         generations=generations,
+        min_hex_count_ratio=min_hex_count_ratio,
+        forecast_engine=forecast_engine,
         start_date=start_date,
         end_date=end_date,
     )
@@ -137,7 +145,7 @@ def index():
 
 @app.route("/relatorio", methods=["GET"])
 def report():
-    result, selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters = build_analysis_from_request()
+    result, selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap, has_active_filters = build_analysis_from_request()
 
     return render_template(
         "report.html",
@@ -150,6 +158,8 @@ def report():
         show_bairro_heatmap=show_bairro_heatmap,
         pop_size=pop_size,
         generations=generations,
+        min_hex_count_ratio=min_hex_count_ratio,
+        forecast_engine=forecast_engine,
         start_date=start_date,
         end_date=end_date,
         generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),

@@ -15,7 +15,7 @@ from folium.plugins import FastMarkerCluster
 from shapely.geometry import shape
 
 from benchmark_models import train_model_and_forecast
-from genetic_algorithm import GeneticAlgorithmHex
+from genetic_algorithm import GeneticAlgorithmHex, compute_discretization_limits
 from grid_generator import HexagonalGrid
 from predictor import evaluate_model, prepare_weekly_series
 from spatial_utils import (
@@ -26,6 +26,11 @@ from spatial_utils import (
     iter_polygon_parts,
     load_processed_crimes,
 )
+from stgcn_forecaster import (
+    get_stgcn_import_error,
+    is_stgcn_available,
+    load_stgcn_dashboard_artifacts,
+)
 
 
 DEFAULT_POP_SIZE = 6
@@ -34,6 +39,7 @@ DEFAULT_MUTATION_RATE = 0.15
 DEFAULT_CROSSOVER_RATE = 0.8
 DEFAULT_SEED = 42
 DEFAULT_TARGET_HEX_COUNT = 180
+DEFAULT_MIN_HEX_COUNT_RATIO = 0.75
 DEFAULT_HEX_PENALTY_WEIGHT = 5.5
 SPARSE_ACTIVITY_RATIO_FACTOR = 0.35
 SPARSE_MIN_ACTIVITY_RATIO_FLOOR = 0.05
@@ -133,12 +139,56 @@ def load_saved_best_config():
         return json.load(file)
 
 
+def enrich_best_config(
+    best_config,
+    bbox,
+    study_area,
+    target_hex_count=DEFAULT_TARGET_HEX_COUNT,
+    min_hex_count_ratio=DEFAULT_MIN_HEX_COUNT_RATIO,
+):
+    if best_config is None:
+        return None
+
+    if (
+        best_config.get("min_hex_count") is not None
+        and best_config.get("max_radius") is not None
+        and best_config.get("target_hex_count") is not None
+    ):
+        return best_config
+
+    enriched = dict(best_config)
+    effective_target = int(enriched.get("target_hex_count") or target_hex_count)
+    effective_ratio = float(enriched.get("min_hex_count_ratio") or min_hex_count_ratio)
+    limits = compute_discretization_limits(
+        study_area=study_area,
+        bbox=bbox,
+        target_hex_count=effective_target,
+        min_hex_count_ratio=effective_ratio,
+    )
+    enriched.setdefault("target_hex_count", effective_target)
+    enriched.setdefault("min_hex_count", limits["min_hex_count"])
+    enriched.setdefault("min_hex_count_ratio", limits["min_hex_count_ratio"])
+    enriched.setdefault("max_radius", limits["max_radius"])
+    return enriched
+
+
 def load_best_model_name():
     if not os.path.exists(BENCHMARK_JSON_PATH):
         return "poisson"
     with open(BENCHMARK_JSON_PATH, "r", encoding="utf-8") as file:
         payload = json.load(file)
     return payload.get("best_model", "poisson")
+
+
+def build_grid_from_config(bbox, study_area, best_config):
+    return HexagonalGrid(
+        bbox,
+        dx=best_config["dx"],
+        dy=best_config["dy"],
+        theta=best_config["theta"],
+        R=best_config["R"],
+        study_area=study_area,
+    )
 
 
 def get_available_bairros(df):
@@ -164,26 +214,30 @@ def filter_dataframe(df, bairros=None, start_date=None, end_date=None):
     return filtered
 
 
-def build_cache_key(selected_bairros, start_date, end_date, pop_size, generations, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap):
+def build_cache_key(selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine, hide_sparse_hexes, show_cvli_points, show_bairro_heatmap):
     return (
         _normalize_bairros(selected_bairros),
         str(start_date or ""),
         str(end_date or ""),
         int(pop_size),
         int(generations),
+        round(float(min_hex_count_ratio), 4),
+        str(forecast_engine or "default"),
         bool(hide_sparse_hexes),
         bool(show_cvli_points),
         bool(show_bairro_heatmap),
     )
 
 
-def build_analysis_cache_key(selected_bairros, start_date, end_date, pop_size, generations):
+def build_analysis_cache_key(selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine):
     return (
         _normalize_bairros(selected_bairros),
         str(start_date or ""),
         str(end_date or ""),
         int(pop_size),
         int(generations),
+        round(float(min_hex_count_ratio), 4),
+        str(forecast_engine or "default"),
     )
 
 
@@ -227,7 +281,7 @@ def summarize_hex_activity(df_hex):
     return summary
 
 
-def build_metrics(df_filtered, df_hex, best_config, grid, hex_summary, hide_sparse_hexes, forecast_df, best_model_name):
+def build_metrics(df_filtered, df_hex, best_config, grid, hex_summary, hide_sparse_hexes, forecast_df, best_model_name, hex_mse_override=None):
     sparse_hidden = int(hex_summary["is_sparse"].sum()) if not hex_summary.empty else 0
     metrics = {
         "records": int(len(df_filtered)),
@@ -246,7 +300,9 @@ def build_metrics(df_filtered, df_hex, best_config, grid, hex_summary, hide_spar
         "forecast_model": best_model_name,
     }
 
-    if len(df_hex) > 10:
+    if hex_mse_override is not None:
+        metrics["mse_hex"] = float(hex_mse_override)
+    elif len(df_hex) > 10:
         df_series_hex = prepare_weekly_series(df_hex, region_col="hex_id", lags=3)
         metrics["mse_hex"] = evaluate_model(df_series_hex, region_col="hex_id", lags=3)
 
@@ -259,6 +315,10 @@ def build_metrics(df_filtered, df_hex, best_config, grid, hex_summary, hide_spar
 
     if best_config:
         metrics["best_mse"] = best_config.get("best_mse")
+        metrics["target_hex_count"] = best_config.get("target_hex_count")
+        metrics["min_hex_count"] = best_config.get("min_hex_count")
+        metrics["min_hex_count_ratio"] = best_config.get("min_hex_count_ratio")
+        metrics["max_radius"] = best_config.get("max_radius")
 
     return metrics
 
@@ -291,7 +351,7 @@ def _build_cvli_pin_html():
     """
 
 
-def _build_map_legend_html(show_cvli_points=False, show_bairro_heatmap=False):
+def _build_map_legend_html(show_cvli_points=False, show_bairro_heatmap=False, forecast_engine="default"):
     cluster_section = ""
     if show_cvli_points:
         cluster_section = """
@@ -340,6 +400,11 @@ def _build_map_legend_html(show_cvli_points=False, show_bairro_heatmap=False):
         </div>
         """
 
+    hex_title = "Previsao ST-GCN por hexagono" if forecast_engine == "stgcn" else "Intensidade dos hexagonos"
+    low_label = "Menor previsao da proxima semana" if forecast_engine == "stgcn" else "Menor concentracao de CVLI"
+    mid_label = "Previsao intermediaria" if forecast_engine == "stgcn" else "Concentracao intermediaria"
+    high_label = "Maior previsao da proxima semana" if forecast_engine == "stgcn" else "Maior concentracao de CVLI"
+
     return f"""
     <div style="
         position: fixed;
@@ -358,18 +423,18 @@ def _build_map_legend_html(show_cvli_points=False, show_bairro_heatmap=False):
         line-height: 1.35;
     ">
         <div style="font-weight:800; margin-bottom:8px;">Legenda</div>
-        <div style="font-weight:700; margin-bottom:6px;">Intensidade dos hexagonos</div>
+        <div style="font-weight:700; margin-bottom:6px;">{hex_title}</div>
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
             <span style="width:16px; height:16px; border-radius:4px; background:#ddd6fe; border:1px solid #7e22ce; display:inline-block;"></span>
-            <span>Menor concentracao de CVLI</span>
+            <span>{low_label}</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
             <span style="width:16px; height:16px; border-radius:4px; background:#a855f7; border:1px solid #7e22ce; display:inline-block;"></span>
-            <span>Concentracao intermediaria</span>
+            <span>{mid_label}</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
             <span style="width:16px; height:16px; border-radius:4px; background:#ef4444; border:1px solid #7e22ce; display:inline-block;"></span>
-            <span>Maior concentracao de CVLI</span>
+            <span>{high_label}</span>
         </div>
         {bairro_section}
         {cluster_section}
@@ -458,6 +523,7 @@ def build_map(
     hide_sparse_hexes=False,
     hex_summary=None,
     forecast_df=None,
+    forecast_engine="default",
     show_cvli_points=False,
     show_bairro_heatmap=False,
 ):
@@ -470,12 +536,6 @@ def build_map(
     group_bairro_heatmap = FeatureGroup(name="Histórico de CVLI por bairro", show=show_bairro_heatmap)
 
     hex_counts = df_hex["hex_id"].value_counts().to_dict()
-    max_count = max(hex_counts.values()) if hex_counts else 1
-    color_scale = LinearColormap(
-        colors=["#ddd6fe", "#a855f7", "#ec4899", "#ef4444"],
-        vmin=0,
-        vmax=max_count,
-    )
 
     sparse_lookup = {}
     if hex_summary is not None and not hex_summary.empty:
@@ -487,6 +547,25 @@ def build_map(
     forecast_lookup = {}
     if forecast_df is not None and not forecast_df.empty:
         forecast_lookup = forecast_df.set_index("hex_id").to_dict("index")
+
+    if forecast_engine == "stgcn" and forecast_lookup:
+        hex_intensity = {
+            int(hex_id): float(meta.get("previsao_proxima_semana", 0.0))
+            for hex_id, meta in forecast_lookup.items()
+        }
+    else:
+        hex_intensity = {
+            int(hex_id): float(count)
+            for hex_id, count in hex_counts.items()
+            if hex_id != -1
+        }
+
+    max_count = max(hex_intensity.values()) if hex_intensity else 1
+    color_scale = LinearColormap(
+        colors=["#ddd6fe", "#a855f7", "#ec4899", "#ef4444"],
+        vmin=0,
+        vmax=max_count,
+    )
 
     visible_hex_ids = {hex_id for hex_id in hex_counts if hex_id != -1}
     if hide_sparse_hexes and sparse_lookup:
@@ -501,8 +580,9 @@ def build_map(
             continue
 
         geometry = grid.display_hexagons[hex_id]
-        normalized = count / max(max_count, 1)
-        fill_color = color_scale(count)
+        display_value = float(hex_intensity.get(int(hex_id), 0.0))
+        normalized = display_value / max(max_count, 1)
+        fill_color = color_scale(display_value)
         fill_opacity = 0.05 + (0.11 * normalized)
         hex_meta = summary_lookup.get(hex_id, {})
         hex_forecast = forecast_lookup.get(hex_id, {})
@@ -741,6 +821,7 @@ def build_map(
             _build_map_legend_html(
                 show_cvli_points=show_cvli_points,
                 show_bairro_heatmap=show_bairro_heatmap,
+                forecast_engine=forecast_engine,
             )
         )
     )
@@ -754,6 +835,8 @@ def analyze_filters(
     end_date=None,
     pop_size=DEFAULT_POP_SIZE,
     generations=DEFAULT_GENERATIONS,
+    min_hex_count_ratio=DEFAULT_MIN_HEX_COUNT_RATIO,
+    forecast_engine="default",
     hide_sparse_hexes=False,
     show_cvli_points=False,
     show_bairro_heatmap=False,
@@ -765,6 +848,8 @@ def analyze_filters(
         end_date,
         pop_size,
         generations,
+        min_hex_count_ratio,
+        forecast_engine,
         hide_sparse_hexes,
         show_cvli_points,
         show_bairro_heatmap,
@@ -782,6 +867,8 @@ def analyze_filters(
         "end_date": end_date or "",
         "pop_size": int(pop_size),
         "generations": int(generations),
+        "min_hex_count_ratio": float(min_hex_count_ratio),
+        "forecast_engine": str(forecast_engine or "default"),
         "hide_sparse_hexes": bool(hide_sparse_hexes),
         "show_cvli_points": bool(show_cvli_points),
         "show_bairro_heatmap": bool(show_bairro_heatmap),
@@ -800,7 +887,29 @@ def analyze_filters(
             error="Poucos registros para otimização confiável. Amplie o intervalo de datas ou selecione mais bairros.",
         )
 
-    analysis_cache_key = build_analysis_cache_key(selected_bairros, start_date, end_date, pop_size, generations)
+    if forecast_engine == "stgcn" and not is_stgcn_available():
+        return AnalysisResult(
+            filters=filters,
+            summary={},
+            metrics={"records": int(len(df_filtered))},
+            best_config=None,
+            map_html=None,
+            error=f"Motor ST-GCN indisponível neste ambiente. Instale PyTorch para ativar o switch. Detalhe: {get_stgcn_import_error()}",
+        )
+
+    if forecast_engine == "stgcn":
+        stgcn_artifacts = load_stgcn_dashboard_artifacts()
+        if stgcn_artifacts is None:
+            return AnalysisResult(
+                filters=filters,
+                summary={},
+                metrics={"records": int(len(df_filtered))},
+                best_config=None,
+                map_html=None,
+                error="O ST-GCN agora usa treino único offline. Gere os artefatos antes de usar o switch com `python src/run_stgcn_train_once.py`.",
+            )
+
+    analysis_cache_key = build_analysis_cache_key(selected_bairros, start_date, end_date, pop_size, generations, min_hex_count_ratio, forecast_engine)
     if analysis_cache_key in _ANALYSIS_CACHE:
         analysis = _ANALYSIS_CACHE[analysis_cache_key]
         df_filtered = analysis["df_filtered"]
@@ -811,14 +920,30 @@ def analyze_filters(
         hex_summary = analysis["hex_summary"]
         forecast_df = analysis["forecast_df"]
         best_model_name = analysis["best_model_name"]
+        hex_mse_override = analysis.get("hex_mse_override")
         base_metrics = analysis["base_metrics"]
         summary = analysis["summary"]
         use_saved_default = analysis["use_saved_default"]
     else:
         bbox = compute_bbox(df_filtered)
         study_area = build_study_area(df_filtered)
-        use_saved_default = not selected_bairros and not start_date and not end_date
-        best_config = load_saved_best_config() if use_saved_default else None
+        hex_mse_override = None
+        if forecast_engine == "stgcn":
+            use_saved_default = True
+            best_config = enrich_best_config(
+                load_saved_best_config(),
+                bbox=bbox,
+                study_area=study_area,
+                min_hex_count_ratio=float(min_hex_count_ratio),
+            )
+        else:
+            use_saved_default = (
+                not selected_bairros
+                and not start_date
+                and not end_date
+                and abs(float(min_hex_count_ratio) - DEFAULT_MIN_HEX_COUNT_RATIO) < 1e-9
+            )
+            best_config = load_saved_best_config() if use_saved_default else None
 
         if best_config is None:
             ga = GeneticAlgorithmHex(
@@ -832,27 +957,43 @@ def analyze_filters(
                 seed=DEFAULT_SEED,
                 target_hex_count=DEFAULT_TARGET_HEX_COUNT,
                 hex_penalty_weight=DEFAULT_HEX_PENALTY_WEIGHT,
+                min_hex_count_ratio=float(min_hex_count_ratio),
             )
             best_config = ga.run()
+        elif forecast_engine != "stgcn":
+            best_config = enrich_best_config(
+                best_config,
+                bbox=bbox,
+                study_area=study_area,
+                min_hex_count_ratio=float(min_hex_count_ratio),
+            )
 
-        grid = HexagonalGrid(
-            bbox,
-            dx=best_config["dx"],
-            dy=best_config["dy"],
-            theta=best_config["theta"],
-            R=best_config["R"],
-            study_area=study_area,
-        )
+        grid = build_grid_from_config(bbox, study_area, best_config)
 
         df_hex = df_filtered.copy()
         df_hex["hex_id"] = grid.assign_points(df_hex)
         df_hex = df_hex[df_hex["hex_id"] != -1].copy()
         hex_summary = summarize_hex_activity(df_hex)
-        best_model_name = load_best_model_name()
-        weekly_series = prepare_weekly_series(df_hex, region_col="hex_id", lags=3)
-        _, forecast_df = train_model_and_forecast(weekly_series, best_model_name, region_col="hex_id", lags=3)
+        if forecast_engine == "stgcn":
+            best_model_name = stgcn_artifacts["model_name"]
+            forecast_df = stgcn_artifacts["forecasts_df"].copy()
+            hex_mse_override = stgcn_artifacts.get("mse")
+        else:
+            weekly_series = prepare_weekly_series(df_hex, region_col="hex_id", lags=3)
+            best_model_name = load_best_model_name()
+            _, forecast_df = train_model_and_forecast(weekly_series, best_model_name, region_col="hex_id", lags=3)
 
-        base_metrics = build_metrics(df_filtered, df_hex, best_config, grid, hex_summary, False, forecast_df, best_model_name)
+        base_metrics = build_metrics(
+            df_filtered,
+            df_hex,
+            best_config,
+            grid,
+            hex_summary,
+            False,
+            forecast_df,
+            best_model_name,
+            hex_mse_override=hex_mse_override,
+        )
         base_metrics["assigned_records"] = int(len(df_hex))
         base_metrics["used_saved_config"] = use_saved_default and load_saved_best_config() is not None
 
@@ -860,6 +1001,10 @@ def analyze_filters(
             "bbox": tuple(float(value) for value in bbox),
             "selected_bairros_count": len(selected_bairros),
             "target_hex_count": DEFAULT_TARGET_HEX_COUNT,
+            "min_hex_count": best_config.get("min_hex_count"),
+            "min_hex_count_ratio": best_config.get("min_hex_count_ratio"),
+            "max_radius": best_config.get("max_radius"),
+            "forecast_engine": forecast_engine,
         }
         _ANALYSIS_CACHE[analysis_cache_key] = {
             "df_filtered": df_filtered,
@@ -870,6 +1015,7 @@ def analyze_filters(
             "hex_summary": hex_summary,
             "forecast_df": forecast_df,
             "best_model_name": best_model_name,
+            "hex_mse_override": hex_mse_override,
             "base_metrics": base_metrics,
             "summary": summary,
             "use_saved_default": use_saved_default,
@@ -887,6 +1033,7 @@ def analyze_filters(
         hide_sparse_hexes=hide_sparse_hexes,
         hex_summary=hex_summary,
         forecast_df=forecast_df,
+        forecast_engine=forecast_engine,
         show_cvli_points=show_cvli_points,
         show_bairro_heatmap=show_bairro_heatmap,
     )

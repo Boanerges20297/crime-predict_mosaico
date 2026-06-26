@@ -1,9 +1,33 @@
+import math
 import time
 
 import numpy as np
 
 from grid_generator import HexagonalGrid
 from predictor import evaluate_model, prepare_weekly_series
+
+
+def compute_discretization_limits(study_area, bbox, target_hex_count, min_hex_count_ratio=0.75):
+    min_hex_count = max(1, int(round(target_hex_count * min_hex_count_ratio)))
+
+    if study_area is not None and not study_area.is_empty:
+        coverage_area = float(study_area.area)
+    else:
+        min_lon, min_lat, max_lon, max_lat = bbox
+        coverage_area = float(max(max_lon - min_lon, 0.0) * max(max_lat - min_lat, 0.0))
+
+    if coverage_area <= 0:
+        max_radius = 0.03
+    else:
+        hex_area_constant = 3 * math.sqrt(3) / 2
+        discretization_radius = math.sqrt(coverage_area / (max(min_hex_count, 1) * hex_area_constant))
+        max_radius = float(np.clip(discretization_radius, 0.0075, 0.03))
+
+    return {
+        "min_hex_count": min_hex_count,
+        "min_hex_count_ratio": min_hex_count_ratio,
+        "max_radius": max_radius,
+    }
 
 
 class GeneticAlgorithmHex:
@@ -19,6 +43,8 @@ class GeneticAlgorithmHex:
         seed=42,
         target_hex_count=250,
         hex_penalty_weight=6.0,
+        min_hex_count_ratio=0.75,
+        discretization_penalty_weight=8.0,
     ):
         self.df = df
         self.bbox = bbox
@@ -30,13 +56,23 @@ class GeneticAlgorithmHex:
         self.seed = seed
         self.target_hex_count = target_hex_count
         self.hex_penalty_weight = hex_penalty_weight
+        self.min_hex_count_ratio = min_hex_count_ratio
+        self.discretization_penalty_weight = discretization_penalty_weight
         np.random.seed(seed)
 
+        discretization_limits = compute_discretization_limits(
+            study_area=self.study_area,
+            bbox=self.bbox,
+            target_hex_count=self.target_hex_count,
+            min_hex_count_ratio=self.min_hex_count_ratio,
+        )
+        self.min_hex_count = discretization_limits["min_hex_count"]
+        self.max_radius = discretization_limits["max_radius"]
         self.bounds = [
             (0.0, 1.0),
             (0.0, 1.0),
             (0.0, np.pi / 3),
-            (0.0075, 0.03),
+            (0.0075, self.max_radius),
         ]
         self.population = self._init_population()
 
@@ -64,6 +100,7 @@ class GeneticAlgorithmHex:
                 "penalized_mse": np.inf,
                 "hex_count": 0,
                 "active_hex_count": 0,
+                "discretization_gap": 1.0,
             }
 
         df_series = prepare_weekly_series(df_temp, region_col="hex_id", lags=3)
@@ -75,12 +112,18 @@ class GeneticAlgorithmHex:
                 "penalized_mse": np.inf,
                 "hex_count": len(grid.display_hexagons),
                 "active_hex_count": int(df_temp["hex_id"].nunique()),
+                "discretization_gap": 1.0,
             }
 
         hex_count = len(grid.display_hexagons)
         active_hex_count = int(df_temp["hex_id"].nunique())
         hex_deviation = abs(hex_count - self.target_hex_count) / max(self.target_hex_count, 1)
-        penalized_mse = mse + (self.hex_penalty_weight * hex_deviation)
+        discretization_gap = max(self.min_hex_count - hex_count, 0) / max(self.min_hex_count, 1)
+        penalized_mse = (
+            mse
+            + (self.hex_penalty_weight * hex_deviation)
+            + (self.discretization_penalty_weight * discretization_gap)
+        )
         fitness = 1.0 / (penalized_mse + 1e-8)
 
         return {
@@ -89,6 +132,7 @@ class GeneticAlgorithmHex:
             "penalized_mse": penalized_mse,
             "hex_count": hex_count,
             "active_hex_count": active_hex_count,
+            "discretization_gap": discretization_gap,
         }
 
     def fitness(self, individual):
@@ -129,6 +173,10 @@ class GeneticAlgorithmHex:
         best_fitness = -1.0
 
         print("Iniciando evolução...")
+        print(
+            f"Limite dinâmico do raio: R <= {self.max_radius:.6f} | "
+            f"Piso de discretização: {self.min_hex_count} hexágonos"
+        )
         for generation in range(self.generations):
             start = time.time()
             fitnesses = []
@@ -162,6 +210,7 @@ class GeneticAlgorithmHex:
                 f"EQM: {best_score['mse']:.4f} | "
                 f"EQM penalizado: {best_score['penalized_mse']:.4f} | "
                 f"Hex criados: {best_score['hex_count']} | "
+                f"Gap discretização: {best_score['discretization_gap']:.3f} | "
                 f"Tempo: {elapsed:.2f}s"
             )
 
@@ -177,4 +226,8 @@ class GeneticAlgorithmHex:
             "hex_count": best_score["hex_count"],
             "active_hex_count": best_score["active_hex_count"],
             "target_hex_count": self.target_hex_count,
+            "min_hex_count": self.min_hex_count,
+            "min_hex_count_ratio": self.min_hex_count_ratio,
+            "max_radius": self.max_radius,
+            "discretization_penalty_weight": self.discretization_penalty_weight,
         }

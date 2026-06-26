@@ -218,8 +218,12 @@
                         <td>{% if show_cvli_points %}Ativos{% else %}Inativos{% endif %}</td>
                     </tr>
                     <tr>
-                        <td>Intensidade histórica por bairro</td>
+                        <td>Intensidade historica por bairro</td>
                         <td>{% if show_bairro_heatmap %}Ativa{% else %}Inativa{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Razao minima de discretizacao</td>
+                        <td>{{ '%.2f'|format(min_hex_count_ratio) }}</td>
                     </tr>
                 </table>
             </section>
@@ -256,7 +260,7 @@
 
             <section>
                 <h2>3. Metodologia espacial</h2>
-                <p>O sistema utiliza apenas registros classificados como CVLI e normaliza previamente nomes de bairros para reduzir duplicidades causadas por acentos, caixa e espacamento. O recorte espacial parte dos pontos filtrados, aplica restricao geográfica de Fortaleza e remove componentes desconectados por agrupamento espacial.</p>
+                <p>O sistema utiliza apenas registros classificados como CVLI e normaliza previamente nomes de bairros para reduzir duplicidades causadas por acentos, caixa e espacamento. O recorte espacial parte dos pontos filtrados, aplica restricao geografica de Fortaleza e remove componentes desconectados por agrupamento espacial.</p>
                 <p>A area de estudo e inferida a partir da distribuicao de pontos por casco concavo quando disponivel, com fallback para casco convexo. Em seguida, a malha hexagonal e recortada por essa area para evitar que a visualizacao extrapole o conjunto espacial principal.</p>
 
                 <h3>Regra de atribuicao espacial</h3>
@@ -265,10 +269,10 @@
             </section>
 
             <section>
-                <h2>4. Formulação matematica da malha</h2>
+                <h2>4. Formulacao matematica da malha</h2>
                 <p>Cada individuo do algoritmo genetico e representado por:</p>
                 <div class="formula-block">g = (dx, dy, theta, R)</div>
-                <p>em que <span class="formula">dx</span> e <span class="formula">dy</span> deslocam a origem da malha, <span class="formula">theta</span> rotaciona a tesselação e <span class="formula">R</span> define o raio do hexagono regular.</p>
+                <p>em que <span class="formula">dx</span> e <span class="formula">dy</span> deslocam a origem da malha, <span class="formula">theta</span> rotaciona a tesselacao e <span class="formula">R</span> define o raio do hexagono regular.</p>
 
                 <table>
                     <tr>
@@ -308,7 +312,10 @@
                 <div class="formula-block">EQM = (1 / m) * soma((y_k - y_hat_k)^2)</div>
                 <p>Tambem ha penalizacao quando o numero de hexagonos se afasta do alvo:</p>
                 <div class="formula-block">delta_hex = |N_hex - N_alvo| / max(N_alvo, 1)</div>
-                <div class="formula-block">EQM_penalizado = EQM + lambda * delta_hex</div>
+                <p>Quando a malha fica grosseira demais para o recorte filtrado, entra uma penalizacao adicional de discretizacao:</p>
+                <div class="formula-block">N_min = arredonda(N_alvo * razao_min)</div>
+                <div class="formula-block">gap_disc = max(N_min - N_hex, 0) / max(N_min, 1)</div>
+                <div class="formula-block">EQM_penalizado = EQM + lambda * delta_hex + gamma * gap_disc</div>
                 <div class="formula-block">fitness(g) = 1 / (EQM_penalizado(g) + 1e-8)</div>
 
                 {% if result.best_config %}
@@ -334,6 +341,18 @@
                             <td>{{ '%.6f'|format(result.best_config.get('R', 0)) }}</td>
                         </tr>
                         <tr>
+                            <td>Razao minima de discretizacao</td>
+                            <td>{{ '%.2f'|format(result.best_config.get('min_hex_count_ratio', 0)) }}</td>
+                        </tr>
+                        <tr>
+                            <td>Piso minimo de hexagonos</td>
+                            <td>{{ result.best_config.get('min_hex_count', '-') }}</td>
+                        </tr>
+                        <tr>
+                            <td>Limite superior de R</td>
+                            <td>{{ '%.6f'|format(result.best_config.get('max_radius', 0)) }}</td>
+                        </tr>
+                        <tr>
                             <td>EQM da melhor malha</td>
                             <td>{% if result.best_config.get('best_mse') is not none %}{{ '%.6f'|format(result.best_config.get('best_mse')) }}{% else %}-{% endif %}</td>
                         </tr>
@@ -346,13 +365,13 @@
             </section>
 
             <section>
-                <h2>6. Series temporais e previsão</h2>
+                <h2>6. Series temporais e previsao</h2>
                 <p>Para cada hexagono ativo, o sistema cria uma serie semanal de contagens de CVLI. As variaveis explicativas usadas no modelo incluem defasagens, media movel recente, tendencia simples e atributos calendario.</p>
 
                 <table>
                     <tr>
                         <th>Variavel</th>
-                        <th>Interpretação</th>
+                        <th>Interpretacao</th>
                     </tr>
                     <tr>
                         <td><code>lag_1, lag_2, lag_3</code></td>

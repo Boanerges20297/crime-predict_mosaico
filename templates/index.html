@@ -653,6 +653,14 @@
 
                     <div class="field" style="margin-top:4px;">
                         <label style="display:flex; align-items:center; gap:10px; font-weight:600;">
+                            <input type="checkbox" name="use_stgcn" value="1" {% if forecast_engine == 'stgcn' %}checked{% endif %} style="width:auto; margin:0;">
+                            Ativar motor ST-GCN para previsoes por hexagono
+                        </label>
+                        <div class="helper">Treina uma rede spatio-temporal na malha hexagonal com perda Poisson negative log-likelihood. Requer PyTorch no ambiente.</div>
+                    </div>
+
+                    <div class="field" style="margin-top:4px;">
+                        <label style="display:flex; align-items:center; gap:10px; font-weight:600;">
                             <input type="checkbox" name="show_bairro_heatmap" value="1" {% if show_bairro_heatmap %}checked{% endif %} style="width:auto; margin:0;">
                             Mostrar intensidade histórica de CVLI por bairro
                         </label>
@@ -675,6 +683,17 @@
                         <div class="field">
                             <label for="generations">Gerações do AG</label>
                             <input id="generations" name="generations" type="number" min="2" max="30" value="{{ generations }}">
+                        </div>
+                    </div>
+                    <div class="field-grid" style="margin-top:2px;">
+                        <div class="field">
+                            <label for="min_hex_count_ratio">Piso de discretização</label>
+                            <input id="min_hex_count_ratio" name="min_hex_count_ratio" type="number" min="0.50" max="0.95" step="0.05" value="{{ '%.2f'|format(min_hex_count_ratio) }}">
+                            <div class="helper">Razão mínima do alvo de hexágonos que a malha deve preservar. Ex.: `0.75` exige pelo menos 75% do alvo.</div>
+                        </div>
+                        <div class="field">
+                            <label>Faixas sugeridas</label>
+                            <div class="helper" style="margin-top:10px;">Teste `0.70`, `0.75`, `0.80` e `0.85` para comparar concentração vs. granularidade.</div>
                         </div>
                     </div>
                     <div class="helper">Aumente esses valores só quando quiser uma busca mais refinada, porque o tempo de execução sobe bastante.</div>
@@ -810,6 +829,18 @@
                             <div class="stat-title">Deslocamento Y</div>
                             <div class="stat-value">{{ '%.4f'|format(result.best_config['dy']) }}</div>
                         </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Piso mínimo</div>
+                            <div class="stat-value">{{ result.best_config.get('min_hex_count', 0) }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Razão mínima</div>
+                            <div class="stat-value">{{ '%.2f'|format(result.best_config.get('min_hex_count_ratio', 0)) }}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">R máximo</div>
+                            <div class="stat-value">{{ '%.4f'|format(result.best_config.get('max_radius', 0)) }}</div>
+                        </div>
                     </div>
                 {% else %}
                     <div class="empty-note">Nenhuma otimização disponível para os filtros atuais.</div>
@@ -826,7 +857,7 @@
         const selectAllBairrosButton = document.getElementById('select-all-bairros');
         const selectVisibleButton = document.getElementById('select-visible');
         const filtersForm = document.getElementById('filters-form');
-        const autoSubmitCheckboxes = Array.from(document.querySelectorAll('input[name="hide_sparse_hexes"], input[name="show_cvli_points"], input[name="show_bairro_heatmap"]'));
+        const autoSubmitCheckboxes = Array.from(document.querySelectorAll('input[name="hide_sparse_hexes"], input[name="show_cvli_points"], input[name="show_bairro_heatmap"], input[name="use_stgcn"]'));
         const mapFrameContent = document.getElementById('map-frame-content');
         const feedbackRegion = document.getElementById('feedback-region');
         const reportButton = document.getElementById('report-button');
