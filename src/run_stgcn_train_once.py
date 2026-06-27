@@ -20,9 +20,12 @@ from stgcn_forecaster import run_stgcn_pipeline, save_stgcn_dashboard_artifacts
 
 
 def main():
+    print("[run_stgcn_train_once] carregando base do dashboard")
     df = load_base_dataframe()
+    print(f"[run_stgcn_train_once] registros apos filtros base: {len(df)}")
     bbox = compute_bbox(df)
     study_area = build_study_area(df)
+    print("[run_stgcn_train_once] enriquecendo melhor malha salva")
     best_config = enrich_best_config(
         load_saved_best_config(),
         bbox=bbox,
@@ -33,6 +36,12 @@ def main():
     if best_config is None:
         raise RuntimeError("best_hex_grid.json não encontrado para treino único do ST-GCN.")
 
+    print(
+        "[run_stgcn_train_once] malha carregada | "
+        f"target={best_config.get('target_hex_count')} | "
+        f"hex_count={best_config.get('hex_count')} | "
+        f"active_hex_count={best_config.get('active_hex_count')}"
+    )
     grid = HexagonalGrid(
         bbox,
         dx=best_config["dx"],
@@ -45,7 +54,12 @@ def main():
     df_hex = df.copy()
     df_hex["hex_id"] = grid.assign_points(df_hex)
     df_hex = df_hex[df_hex["hex_id"] != -1].copy()
+    print(
+        f"[run_stgcn_train_once] registros associados a hexagonos: {len(df_hex)} | "
+        f"hexagonos ativos: {df_hex['hex_id'].nunique()}"
+    )
     weekly_series = prepare_weekly_series(df_hex, region_col="hex_id", lags=3)
+    print(f"[run_stgcn_train_once] serie semanal pronta | linhas={len(weekly_series)}")
 
     result = run_stgcn_pipeline(weekly_series, region_col="hex_id", grid=grid)
     result["training_scope"] = "fortaleza_base_fixa"
@@ -53,6 +67,7 @@ def main():
     result["min_hex_count_ratio"] = best_config.get("min_hex_count_ratio")
     result["hex_count"] = int(best_config.get("hex_count", len(grid.display_hexagons)))
     result["active_hex_count"] = int(df_hex["hex_id"].nunique())
+    print("[run_stgcn_train_once] salvando artefatos do dashboard")
     save_stgcn_dashboard_artifacts(result)
 
     print("=== Treino unico do ST-GCN concluido ===")

@@ -760,6 +760,11 @@
                         {{ result.metrics.get('data_inicial', '-') }} até {{ result.metrics.get('data_final', '-') }}
                     </div>
                     <div class="summary-item">
+                        <strong>Atualização dos dados</strong>
+                        Base observada até {{ dashboard_data_status.get('latest_data_date', '-') }}<br>
+                        Init {{ dashboard_data_status.get('started_at', '-') }}
+                    </div>
+                    <div class="summary-item">
                         <strong>EQM hexagonal</strong>
                         {% if result.metrics.get('mse_hex') is not none %}{{ '%.4f'|format(result.metrics.get('mse_hex')) }}{% else %}-{% endif %}
                     </div>

@@ -295,6 +295,7 @@ def _fit_single_model(
     weight_decay,
     batch_size,
     patience,
+    progress_prefix=None,
 ):
     if not TORCH_AVAILABLE:
         raise RuntimeError(f"PyTorch indisponível para ST-GCN: {TORCH_IMPORT_ERROR}")
@@ -322,7 +323,9 @@ def _fit_single_model(
     epochs_without_improvement = 0
     sample_count = x_tensor.shape[0]
 
-    for _ in range(epochs):
+    progress_label = progress_prefix or "ST-GCN"
+
+    for epoch_idx in range(epochs):
         permutation = torch.randperm(sample_count, device=device)
         model.train()
         for start in range(0, sample_count, batch_size):
@@ -342,13 +345,24 @@ def _fit_single_model(
         monitored_loss = val_loss if val_loss is not None else train_loss
         scheduler.step(monitored_loss)
 
+        train_loss_text = f"{train_loss:.6f}" if train_loss is not None else "n/a"
+        val_loss_text = f"{val_loss:.6f}" if val_loss is not None else "n/a"
+        best_loss_text = f"{best_val_loss:.6f}" if math.isfinite(best_val_loss) else "n/a"
+        print(
+            f"[{progress_label}] epoca {epoch_idx + 1}/{epochs} | "
+            f"train_loss={train_loss_text} | val_loss={val_loss_text} | "
+            f"best={best_loss_text} | paciencia={epochs_without_improvement}/{patience}"
+        )
+
         if monitored_loss < best_val_loss:
             best_val_loss = monitored_loss
             best_state = {key: value.detach().cpu().clone() for key, value in model.state_dict().items()}
             epochs_without_improvement = 0
+            print(f"[{progress_label}] nova melhor perda monitorada: {best_val_loss:.6f}")
         else:
             epochs_without_improvement += 1
             if epochs_without_improvement >= patience:
+                print(f"[{progress_label}] early stopping na epoca {epoch_idx + 1}")
                 break
 
     if best_state is not None:
@@ -384,10 +398,15 @@ def _ensemble_predict(
     weight_decay,
     batch_size,
     patience,
+    progress_label=None,
 ):
     predictions = []
     losses = []
-    for seed in DEFAULT_SEEDS[:ensemble_size]:
+    selected_seeds = DEFAULT_SEEDS[:ensemble_size]
+    ensemble_label = progress_label or "ST-GCN"
+    for ensemble_idx, seed in enumerate(selected_seeds, start=1):
+        seed_label = f"{ensemble_label} | semente {ensemble_idx}/{len(selected_seeds)} ({seed})"
+        print(f"[{seed_label}] iniciando treino")
         model, adjacency_tensor, device, best_loss = _fit_single_model(
             train_x=train_x,
             train_y=train_y,
@@ -403,9 +422,11 @@ def _ensemble_predict(
             weight_decay=weight_decay,
             batch_size=batch_size,
             patience=patience,
+            progress_prefix=seed_label,
         )
         predictions.append(_predict(model, adjacency_tensor, device, predict_x))
         losses.append(best_loss)
+        print(f"[{seed_label}] concluido | best_loss={best_loss:.6f}")
     return np.mean(predictions, axis=0), float(np.mean(losses))
 
 
@@ -427,6 +448,7 @@ def run_stgcn_pipeline(
     if not TORCH_AVAILABLE:
         raise RuntimeError(f"PyTorch indisponível para ST-GCN: {TORCH_IMPORT_ERROR}")
 
+    print("[ST-GCN] preparando sequencias temporais")
     prepared = _prepare_sequences(
         df_model,
         region_col=region_col,
@@ -437,11 +459,17 @@ def run_stgcn_pipeline(
         raise RuntimeError("Série histórica insuficiente para montar janelas do ST-GCN.")
 
     region_ids = prepared["region_ids"]
+    print(
+        f"[ST-GCN] janelas prontas | nos={len(region_ids)} | "
+        f"fit={len(prepared['fit_x'])} | val={len(prepared['val_x'])} | "
+        f"test={len(prepared['test_x'])} | input_dim={prepared['input_dim']}"
+    )
     adjacency = _build_adjacency(region_ids, grid=grid)
 
     if prepared["fit_x"].size == 0 or prepared["test_x"].size == 0:
         raise RuntimeError("Divisão temporal insuficiente para avaliar o ST-GCN.")
 
+    print("[ST-GCN] iniciando treino para avaliacao temporal")
     eval_predictions, best_val_loss = _ensemble_predict(
         train_x=prepared["fit_x"],
         train_y=prepared["fit_y"],
@@ -458,11 +486,14 @@ def run_stgcn_pipeline(
         weight_decay=weight_decay,
         batch_size=batch_size,
         patience=patience,
+        progress_label="ST-GCN avaliacao",
     )
 
     mse = float(mean_squared_error(prepared["test_y"].reshape(-1), eval_predictions.reshape(-1)))
     mae = float(mean_absolute_error(prepared["test_y"].reshape(-1), eval_predictions.reshape(-1)))
+    print(f"[ST-GCN] avaliacao concluida | mse={mse:.6f} | mae={mae:.6f}")
 
+    print("[ST-GCN] iniciando treino para previsao operacional t+1")
     next_step_prediction, _ = _ensemble_predict(
         train_x=prepared["train_x"],
         train_y=prepared["train_y"],
@@ -479,8 +510,10 @@ def run_stgcn_pipeline(
         weight_decay=weight_decay,
         batch_size=batch_size,
         patience=patience,
+        progress_label="ST-GCN previsao_t+1",
     )
     next_step_prediction = next_step_prediction[0]
+    print("[ST-GCN] previsao operacional concluida")
 
     latest_rows = (
         df_model.sort_values("semana")

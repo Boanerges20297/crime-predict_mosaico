@@ -32,20 +32,74 @@ from dashboard_service import (  # noqa: E402
     get_available_bairros,
     load_base_dataframe,
 )
+from prepare_data import OUTPUT_PATH, main as prepare_data_main, resolve_enriched_path  # noqa: E402
 
 
 ORIENTADOR_PASSWORD = os.environ.get("ORIENTADOR_PASSWORD", "orientador@2024")
 ORIENTADOR_DIR = os.path.join(BASE_DIR, "data", "orientador")
 ENTREGAS_DIR = os.path.join(ORIENTADOR_DIR, "entregas")
 CHAT_FILE = os.path.join(ORIENTADOR_DIR, "chat.json")
+NORMALIZED_DATA_PATH = os.path.join(BASE_DIR, "data", "processed", "fortaleza_crimes_normalizado.csv")
 
 os.makedirs(ENTREGAS_DIR, exist_ok=True)
 
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "crime-predict-fallback-secret")
 
+
+def _refresh_dashboard_data_on_startup():
+    try:
+        enriched_path = resolve_enriched_path()
+    except FileNotFoundError as exc:
+        return {
+            "refreshed_on_startup": False,
+            "refresh_reason": str(exc),
+            "source_path": None,
+            "processed_path": None,
+        }
+
+    processed_candidates = [OUTPUT_PATH, NORMALIZED_DATA_PATH]
+    existing_processed = [path for path in processed_candidates if os.path.exists(path)]
+    enriched_mtime = os.path.getmtime(enriched_path)
+    needs_refresh = any(not os.path.exists(path) for path in processed_candidates)
+
+    if existing_processed and not needs_refresh:
+        oldest_processed_mtime = min(os.path.getmtime(path) for path in existing_processed)
+        needs_refresh = oldest_processed_mtime < enriched_mtime
+
+    refreshed = False
+    if needs_refresh:
+        prepare_data_main()
+        refreshed = True
+
+    if os.path.exists(OUTPUT_PATH):
+        normalized_missing_or_stale = (
+            not os.path.exists(NORMALIZED_DATA_PATH)
+            or os.path.getmtime(NORMALIZED_DATA_PATH) < os.path.getmtime(OUTPUT_PATH)
+        )
+        if normalized_missing_or_stale:
+            shutil.copy2(OUTPUT_PATH, NORMALIZED_DATA_PATH)
+            refreshed = True
+
+    processed_path = NORMALIZED_DATA_PATH if os.path.exists(NORMALIZED_DATA_PATH) else OUTPUT_PATH
+    return {
+        "refreshed_on_startup": refreshed,
+        "refresh_reason": "startup-sync",
+        "source_path": enriched_path,
+        "processed_path": processed_path if os.path.exists(processed_path) else None,
+    }
+
+
+STARTUP_DATA_STATUS = _refresh_dashboard_data_on_startup()
 BASE_DF = load_base_dataframe()
 AVAILABLE_BAIRROS = get_available_bairros(BASE_DF)
+STARTUP_DATA_STATUS.update(
+    {
+        "latest_data_date": BASE_DF["data"].max().date().isoformat() if len(BASE_DF) else None,
+        "records_loaded": int(len(BASE_DF)),
+        "started_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+    }
+)
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -127,6 +181,7 @@ def index():
     return render_template(
         "index.html",
         result=result,
+        dashboard_data_status=STARTUP_DATA_STATUS,
         available_bairros=AVAILABLE_BAIRROS,
         total_bairros=len(AVAILABLE_BAIRROS),
         selected_bairros=selected_bairros,
@@ -297,4 +352,5 @@ def orientador_chat_post():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    debug_enabled = os.environ.get("FLASK_DEBUG", "").strip().lower() in {"1", "true", "yes", "on"}
+    app.run(host="127.0.0.1", port=5000, debug=debug_enabled, use_reloader=False)
