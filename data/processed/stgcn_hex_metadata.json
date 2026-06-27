@@ -1,0 +1,17 @@
+{
+  "model_name": "stgcn_poisson_nll",
+  "mse": 0.030530864372849464,
+  "mae": 0.07489681243896484,
+  "node_count": 176,
+  "seq_len": 12,
+  "best_validation_loss": 0.2508734464645386,
+  "ensemble_size": 2,
+  "input_dim": 6,
+  "hidden_dim": 48,
+  "epochs": 140,
+  "training_scope": "fortaleza_base_fixa",
+  "target_hex_count": 180,
+  "min_hex_count_ratio": 0.75,
+  "hex_count": 182,
+  "active_hex_count": 176
+}

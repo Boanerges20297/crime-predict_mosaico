@@ -1,0 +1,15 @@
+{
+    "dx": 0.6118528947223795,
+    "dy": 0.04251352851482647,
+    "theta": 0.3059331605412711,
+    "R": 0.007745170672819848,
+    "best_mse": 0.03238447751599426,
+    "penalized_mse": 0.09349558862710539,
+    "hex_count": 182,
+    "active_hex_count": 176,
+    "target_hex_count": 180,
+    "min_hex_count": 135,
+    "min_hex_count_ratio": 0.75,
+    "max_radius": 0.008169203622887408,
+    "discretization_penalty_weight": 8.0
+}
