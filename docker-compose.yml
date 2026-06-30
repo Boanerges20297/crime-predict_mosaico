@@ -4,7 +4,7 @@ services:
     container_name: crime-predict
     restart: always
     ports:
-      - "8090:5000"
+      - "8091:5000"
     environment:
       PYTHONUNBUFFERED: "1"
     volumes:
