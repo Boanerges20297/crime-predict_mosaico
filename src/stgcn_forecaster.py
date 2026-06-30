@@ -597,6 +597,10 @@ def save_stgcn_dashboard_artifacts(result_payload):
 
 def load_stgcn_dashboard_artifacts():
     if not os.path.exists(STGCN_FORECASTS_CSV_PATH) or not os.path.exists(STGCN_METADATA_JSON_PATH):
+        print(f"[load_stgcn_dashboard_artifacts] ATENÇÃO: Artefatos ST-GCN não encontrados.\n"
+              f"  - CSV esperado: {os.path.abspath(STGCN_FORECASTS_CSV_PATH)} (Existe: {os.path.exists(STGCN_FORECASTS_CSV_PATH)})\n"
+              f"  - JSON esperado: {os.path.abspath(STGCN_METADATA_JSON_PATH)} (Existe: {os.path.exists(STGCN_METADATA_JSON_PATH)})",
+              flush=True)
         return None
 
     forecasts_df = pd.read_csv(STGCN_FORECASTS_CSV_PATH)
